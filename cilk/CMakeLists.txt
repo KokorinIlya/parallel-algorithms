@@ -12,4 +12,4 @@ add_compile_options(-fcilkplus)
 add_executable(bench_prefix_sum.out src/prefix_sum.cpp benchmarks/bench_prefix_sum.cpp)
 target_link_libraries(bench_prefix_sum.out pthread cilkrts)
 
-add_subdirectory(Google_tests)
+add_subdirectory(tests)
