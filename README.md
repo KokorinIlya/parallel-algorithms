@@ -15,6 +15,11 @@
 * `cd $(pwd)/build`
 * `cmake -DCMAKE_INSTALL_PREFIX=/home/ubuntu/parallel-algorithms/cilk -P cmake_install.cmake`
 
+## Установка GoogleTest
+
+* Выполнять из родительской директории (`/home/ubuntu/parallel-algorithms/cilk/`)
+* `./tests/install_gtest.sh`
+
 ## Компиляция
 
 * Выполнять в директории проекта (`/home/ubuntu/parallel-algorithms/cilk/`)
