@@ -45,12 +45,12 @@ TEST(raw_array, moving_values)
     ASSERT_EQ(x.value, -1);
 }
 
-void write_to_array_copy(moving_array<int32_t> arr)
+void write_to_array_copy(raw_array<int32_t> arr)
 {
     arr[5] = 100;
 }
 
-TEST(raw_array, moving_array)
+TEST(raw_array, copying_array)
 {
     raw_array<int32_t> arr(10);
     arr[5] = 15;
@@ -58,25 +58,25 @@ TEST(raw_array, moving_array)
     ASSERT_EQ(arr[5], 15);
 }
 
-void write_to_array_ref(moving_array<int32_t>& arr)
+void write_to_array_ref(raw_array<int32_t>& arr)
 {
     arr[5] = 100;
 }
 
-TEST(raw_array, moving_array)
+TEST(raw_array, ref_to_array)
 {
     raw_array<int32_t> arr(10);
     arr[5] = 15;
-    write_to_array_copy(arr);
+    write_to_array_ref(arr);
     ASSERT_EQ(arr[5], 100);
 }
 
-void write_to_array_move(moving_array<int32_t>&& arr)
+void write_to_array_move(raw_array<int32_t>&& arr)
 {
     arr[5] = 100;
 }
 
-TEST(raw_array, copy_array)
+TEST(raw_array, move_array)
 {
     raw_array<int32_t> arr(10);
     arr[5] = 15;
