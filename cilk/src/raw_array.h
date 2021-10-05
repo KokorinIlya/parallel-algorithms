@@ -37,7 +37,7 @@ public:
         return *(ptr + idx);
     }
 
-    uint32_t size() const
+    uint32_t get_size() const
     {
         return size;
     }
@@ -46,7 +46,7 @@ public:
     {
         if (ptr != nullptr)
         {
-            ::operator delete(ptr)
+            ::operator delete(ptr);
         }
     }
 private:
