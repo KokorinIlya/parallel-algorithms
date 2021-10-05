@@ -80,7 +80,7 @@ TEST(raw_array, move_array)
 {
     raw_array<int32_t> arr(10);
     arr[5] = 15;
-    write_to_array_move(arr);
+    write_to_array_move(std::move(arr));
     ASSERT_FALSE(arr.is_valid());
 }
 
