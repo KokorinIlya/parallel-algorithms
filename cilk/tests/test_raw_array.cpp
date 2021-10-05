@@ -77,5 +77,7 @@ TEST(raw_array, move_array)
     arr[5] = 15;
     raw_array<int32_t> arr_moved(std::move(arr));
     ASSERT_FALSE(arr.is_valid());
+    ASSERT_TRUE(arr_moved.is_valid());
+    ASSERT_EQ(arr_moved[5], 15);
 }
 
