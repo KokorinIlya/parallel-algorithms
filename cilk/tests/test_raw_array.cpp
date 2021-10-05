@@ -6,6 +6,8 @@ struct test_struct
 {
     int32_t value;
 
+    test_struct() {}
+
     test_struct(test_struct&& other) : value(other.value)
     {
         other.value = -1;
