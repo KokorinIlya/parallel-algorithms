@@ -37,7 +37,7 @@ public:
         return *(ptr + idx);
     }
 
-    uint32_t ize() const
+    uint32_t size() const
     {
         return size;
     }
