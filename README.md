@@ -17,7 +17,7 @@
 
 ## Установка GoogleTest
 
-* Выполнять из родительской директории (`/home/ubuntu/parallel-algorithms/cilk/`)
+* Выполнять в директории проекта (`/home/ubuntu/parallel-algorithms/cilk/`)
 * `./tests/install_gtest.sh`
 
 ## Компиляция
