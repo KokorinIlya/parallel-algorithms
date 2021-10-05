@@ -12,6 +12,13 @@ struct test_struct
     {
         other.value = -1;
     }
+
+    test_struct& operator=(test_struct&& other)
+    {
+        this->value = other.value;
+        other.value = -1;
+        return *this;
+    }
 };
 
 
