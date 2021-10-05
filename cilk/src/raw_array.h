@@ -42,6 +42,11 @@ public:
         return size;
     }
 
+    bool is_valid() const
+    {
+        return ptr != nullptr;
+    }
+
     ~raw_array()
     {
         if (ptr != nullptr)
