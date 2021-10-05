@@ -52,7 +52,7 @@ void write_to_array_copy(moving_array<int32_t> arr)
 
 TEST(raw_array, moving_array)
 {
-    raw_array<test_struct> arr(10);
+    raw_array<int32_t> arr(10);
     arr[5] = 15;
     write_to_array_copy(arr);
     ASSERT_EQ(arr[5], 15);
@@ -65,7 +65,7 @@ void write_to_array_ref(moving_array<int32_t>& arr)
 
 TEST(raw_array, moving_array)
 {
-    raw_array<test_struct> arr(10);
+    raw_array<int32_t> arr(10);
     arr[5] = 15;
     write_to_array_copy(arr);
     ASSERT_EQ(arr[5], 100);
@@ -78,7 +78,7 @@ void write_to_array_move(moving_array<int32_t>&& arr)
 
 TEST(raw_array, copy_array)
 {
-    raw_array<test_struct> arr(10);
+    raw_array<int32_t> arr(10);
     arr[5] = 15;
     write_to_array_move(arr);
     ASSERT_FALSE(arr.is_valid());
