@@ -1,22 +1,43 @@
-#include "prefix_sum.h"
+#include "map_parallel.h"
 #include <chrono>
 #include <random>
 #include <iostream>
 
+int32_t inc(int32_t const& x)
+{
+    return x + 1;
+}
+
+raw_array<int32_t> map_sequential(raw_array<int32_t> const& from, std::function<int32_t(int32_t const&)> mapper)
+{
+    raw_array<T> result(from.get_size());
+    for (uint32_t i = 0; i < from.get_size(); ++i)
+    {
+        result[i] = mapper(from[i]);
+    }
+    return result;
+}
+
 uint64_t measure(std::default_random_engine& generator, std::uniform_int_distribution<int32_t>& elements_distribution,
-                uint32_t sz, uint32_t threads, uint32_t reps)
+                uint32_t sz, uint32_t blocks_count, uint32_t reps)
 {
     uint64_t sum = 0;
     for (uint32_t i = 0; i < reps; ++i)
     {
-        std::vector<int32_t> v(sz);
+        raw_array<int32_t> arr(sz);
         for (uint32_t j = 0; j < v.size(); ++j)
         {
-            v[j] = elements_distribution(generator);
+            arr[j] = elements_distribution(generator);
         }
-        std::vector<int32_t> res(sz);
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-        calc_parallel(v, 10 * threads, res);
+        if (blocks == 0)
+        {
+           map_sequential(arr, &inc);
+        }
+        else
+        {
+            map_parallel(arr, &inc, blocks_count);
+        }
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         sum += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
     }
@@ -36,7 +57,7 @@ int main()
     for (uint32_t i = 1; i <= 16; ++i)
     {
         uint64_t res = measure(generator, elements_distribution, sz, i, reps);
-        std::cout << i * 10 << " chunks, elapsed " << res << " microseconds" << std::endl;
+        std::cout << i * 10 << " blocks, elapsed " << res << " microseconds" << std::endl;
     }
     return 0;
 }

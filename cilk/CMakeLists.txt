@@ -12,4 +12,7 @@ add_compile_options(-fcilkplus)
 add_executable(bench_prefix_sum.out src/prefix_sum.cpp benchmarks/bench_prefix_sum.cpp)
 target_link_libraries(bench_prefix_sum.out pthread cilkrts)
 
+add_executable(bench_map_parallel.out benchmarks/bench_map_parallel.cpp)
+target_link_libraries(bench_map_parallel.out pthread cilkrts)
+
 add_subdirectory(tests)
