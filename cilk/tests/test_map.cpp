@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "map.h"
+#include "map_parallel.h"
 #include <cstdint>
 
 int32_t inc(int32_t const& x)
