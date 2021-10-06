@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "map_parallel.h"
 #include <cstdint>
-#include <functional>
+#include <random>
 
 int32_t inc(int32_t const& x)
 {
