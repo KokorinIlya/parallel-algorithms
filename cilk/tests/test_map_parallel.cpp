@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "map_parallel.h"
 #include <cstdint>
+#include <functional>
 
 int32_t inc(int32_t const& x)
 {
@@ -14,7 +15,7 @@ TEST(parallel_map, simple_test)
     {
         arr[i] = i;
     }
-    raw_array<int32_t> res = map_parallel(arr, &inc, 10);
+    raw_array<int32_t> res = map_parallel<int32_t, int32_t>(arr, &inc, 10);
     ASSERT_EQ(arr.get_size(), res.get_size());
     ASSERT_TRUE(res.is_valid());
     for (uint32_t i = 0; i < res.get_size(); ++i)
