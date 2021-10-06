@@ -25,9 +25,9 @@ raw_array<T> map_parallel(raw_array<F> const& from, std::function<T(F const&)> m
     {
         uint32_t left = i * elements_per_block;
         uint32_t right = left + elements_per_block;
-        if (right > from.get_size.size())
+        if (right > from.get_size())
         {
-            right = from.get_size.size();
+            right = from.get_size();
         }
         for (uint32_t j = left; j < right; ++j)
         {
