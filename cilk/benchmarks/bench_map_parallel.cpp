@@ -37,7 +37,7 @@ uint64_t measure(std::default_random_engine& generator, std::uniform_int_distrib
         }
         else
         {
-            map_parallel(arr, &inc, blocks_count);
+            map_parallel<int32_t, int32_t>(arr, &inc, blocks_count);
         }
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         sum += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
