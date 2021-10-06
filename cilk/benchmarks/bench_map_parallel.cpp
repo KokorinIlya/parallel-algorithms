@@ -48,7 +48,7 @@ uint64_t measure(std::default_random_engine& generator, std::uniform_int_distrib
 int main()
 {
     std::default_random_engine generator(time(nullptr));
-    std::uniform_int_distribution<int32_t> elements_distribution(-1000, 1000);
+    std::uniform_int_distribution<int32_t> elements_distribution(-1000000, 1000000);
     uint32_t sz = 10000000;
     uint32_t reps = 10;
 
@@ -57,7 +57,7 @@ int main()
 
     for (uint32_t i = 1; i <= 16; ++i)
     {
-        uint64_t res = measure(generator, elements_distribution, sz, i, reps);
+        uint64_t res = measure(generator, elements_distribution, sz, i * 10, reps);
         std::cout << i * 10 << " blocks, elapsed " << res << " microseconds" << std::endl;
     }
     return 0;

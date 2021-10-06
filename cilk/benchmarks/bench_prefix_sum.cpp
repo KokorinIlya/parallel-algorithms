@@ -16,7 +16,14 @@ uint64_t measure(std::default_random_engine& generator, std::uniform_int_distrib
         }
         std::vector<int32_t> res(sz);
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-        calc_parallel(v, 10 * threads, res);
+        if (threads == 0)
+        {
+           calc_sequential(v, res);
+        }
+        else
+        {
+            calc_parallel(v, 10 * threads, res);
+        }
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         sum += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
     }
@@ -35,7 +42,7 @@ int main()
 
     for (uint32_t i = 1; i <= 16; ++i)
     {
-        uint64_t res = measure(generator, elements_distribution, sz, i, reps);
+        uint64_t res = measure(generator, elements_distribution, sz, i * 10, reps);
         std::cout << i * 10 << " chunks, elapsed " << res << " microseconds" << std::endl;
     }
     return 0;
