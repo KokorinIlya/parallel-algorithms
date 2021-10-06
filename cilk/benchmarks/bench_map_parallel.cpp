@@ -2,6 +2,7 @@
 #include <chrono>
 #include <random>
 #include <iostream>
+#include <cstdint>
 
 int32_t inc(int32_t const& x)
 {
@@ -10,7 +11,7 @@ int32_t inc(int32_t const& x)
 
 raw_array<int32_t> map_sequential(raw_array<int32_t> const& from, std::function<int32_t(int32_t const&)> mapper)
 {
-    raw_array<T> result(from.get_size());
+    raw_array<int32_t> result(from.get_size());
     for (uint32_t i = 0; i < from.get_size(); ++i)
     {
         result[i] = mapper(from[i]);
