@@ -26,12 +26,12 @@ uint64_t measure(std::default_random_engine& generator, std::uniform_int_distrib
     for (uint32_t i = 0; i < reps; ++i)
     {
         raw_array<int32_t> arr(sz);
-        for (uint32_t j = 0; j < v.size(); ++j)
+        for (uint32_t j = 0; j < arr.size(); ++j)
         {
             arr[j] = elements_distribution(generator);
         }
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-        if (blocks == 0)
+        if (blocks_count == 0)
         {
            map_sequential(arr, &inc);
         }
