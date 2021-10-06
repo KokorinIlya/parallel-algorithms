@@ -1,4 +1,6 @@
 #include "raw_array.h"
+#include <cilk/cilk.h>
+#include <cilk/cilk_api.h>
 #include <functional>
 #include <cstdint>
 #include <cassert>
