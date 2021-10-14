@@ -12,7 +12,7 @@ TEST(sequential_scan, simple)
     {
         x[i] = v[i];
     }
-    auto [psums, total_sum] = scan_inclusive_sequential(x);
+    auto [psums, total_sum] = scan_exclusive_sequential(x);
     std::vector<int32_t> exp_res({0, 1, 4, 7, 14, 12});
     ASSERT_EQ(17, total_sum);
     ASSERT_TRUE(psums.is_valid());
@@ -31,7 +31,7 @@ TEST(blocked_scan, simple)
     {
         x[i] = v[i];
     }
-    auto [psums, total_sum] = scan_inclusive_blocked(x, 3);
+    auto [psums, total_sum] = scan_exclusive_blocked(x, 3);
     std::vector<int32_t> exp_res({0, 1, 4, 7, 14, 12, 17, 19, 23, 29});
     ASSERT_EQ(21, total_sum);
     ASSERT_TRUE(psums.is_valid());
@@ -64,8 +64,8 @@ TEST(blocked_scan, stress)
             x[j] = elements_distribution(generator);
         }
 
-        auto [psums_expected, total_sum_expected] = scan_inclusive_sequential(x);
-        auto [psums, total_sum] = scan_inclusive_blocked(x, cur_blocks);
+        auto [psums_expected, total_sum_expected] = scan_exclusive_sequential(x);
+        auto [psums, total_sum] = scan_exclusive_blocked(x, cur_blocks);
         ASSERT_TRUE(psums_expected.is_valid() && psums.is_valid());
         ASSERT_EQ(psums_expected.get_size(), psums.get_size());
         ASSERT_EQ(cur_size, psums.get_size());
