@@ -8,7 +8,7 @@
 #include <cassert>
 
 template <typename T>
-raw_array<T> filter_parallel(raw_array<T> const& vals, std::function<bool(T const&)> mapper, uint32_t blocks_count)
+raw_array<T> filter_parallel(raw_array<T> const& vals, std::function<bool(T const&)> pred, uint32_t blocks_count)
 {
     assert(vals.is_valid() && vals.get_size() > 0);
 
@@ -24,9 +24,9 @@ raw_array<T> filter_parallel(raw_array<T> const& vals, std::function<bool(T cons
 
     raw_array<int32_t> flags = map_parallel<T, int32_t>(
         vals,
-        [&mapper](T const& val)
+        [&pred](T const& val)
         {
-            if (mapper(val))
+            if (pred(val))
             {
                 return 1;
             }
