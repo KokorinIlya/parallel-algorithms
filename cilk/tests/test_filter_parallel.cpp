@@ -20,7 +20,7 @@ std::vector<T> filter_sequential(raw_array<T> const& vals, std::function<bool(T 
     {
         if (pred(vals[i]))
         {
-            res.append(vals[i]);
+            res.push_back(vals[i]);
         }
     }
     return res;
