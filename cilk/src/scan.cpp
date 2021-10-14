@@ -46,9 +46,9 @@ std::pair<raw_array<int32_t>, int32_t> scan_inclusive_blocked(raw_array<int32_t>
         psums[left] = 0;
         for (uint32_t j = left + 1; j < right; ++j)
         {
-            psums[j] = res[j - 1] + x[j - 1];
+            psums[j] = psums[j - 1] + x[j - 1];
         }
-        deltas[i] = res[right - 1] + x[right - 1];
+        deltas[i] = psums[right - 1] + x[right - 1];
     }
 
     raw_array<int32_t> psum_deltas = scan_inclusive_sequential(deltas).first;
