@@ -40,7 +40,7 @@ uint64_t measure(std::default_random_engine& generator, std::uniform_int_distrib
             map_parallel<int32_t, int32_t>(arr, &inc, blocks_count);
         }
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-        sum += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+        sum += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
     }
     return sum / reps;
 }
@@ -53,12 +53,12 @@ int main()
     uint32_t reps = 10;
 
     uint64_t res = measure(generator, elements_distribution, sz, 0, reps);
-    std::cout << "Sequential, elapsed " << res << " microseconds" << std::endl;
+    std::cout << "Sequential, elapsed " << res << " milliseconds" << std::endl;
 
     for (uint32_t i = 1; i <= 16; ++i)
     {
         uint64_t res = measure(generator, elements_distribution, sz, i * 10, reps);
-        std::cout << i * 10 << " blocks, elapsed " << res << " microseconds" << std::endl;
+        std::cout << i * 10 << " blocks, elapsed " << res << " milliseconds" << std::endl;
     }
     return 0;
 }
