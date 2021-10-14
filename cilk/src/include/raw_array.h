@@ -1,3 +1,6 @@
+#ifndef RAW_ARRAY_H
+#define RAW_ARRAY_H
+
 #include <cstdint>
 #include <new>
 #include <type_traits>
@@ -58,3 +61,5 @@ private:
     uint32_t size;
     T* ptr;
 };
+
+#endif
