@@ -10,7 +10,9 @@ int32_t scan_exclusive_sequential_inplace(raw_array<int32_t>& x)
     x[0] = 0;
     for (uint32_t i = 1; i < x.get_size(); ++i)
     {
+        uint32_t next_t = x[i];
         x[i] = x[i - 1] + t;
+        t = next_t;
     }
     return x[x.get_size() - 1] + t;
 }
