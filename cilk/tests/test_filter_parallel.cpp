@@ -18,7 +18,7 @@ std::vector<T> filter_sequential(raw_array<T> const& vals, std::function<bool(T 
     assert(vals.is_valid() && vals.get_size() > 0);
     for (uint32_t i = 0; i < vals.get_size(); ++i)
     {
-        if (prev(vals[i]))
+        if (pred(vals[i]))
         {
             res.append(vals[i]);
         }
