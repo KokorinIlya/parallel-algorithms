@@ -4,6 +4,7 @@
 #include <random>
 #include <vector>
 #include <functional>
+#include <cassert>
 
 bool is_even(int32_t const& x)
 {
@@ -14,11 +15,12 @@ template <typename T>
 std::vector<T> filter_sequential(raw_array<T> const& vals, std::function<bool(T const&)> pred)
 {
     std::vector<T> res;
-    for (T const& val : vals)
+    assert(vals.is_valid() && vals.get_size() > 0);
+    for (uint32_t i = 0; i < vals.get_size(); ++i)
     {
-        if (prev(val))
+        if (prev(vals[i]))
         {
-            res.append(val);
+            res.append(vals[i]);
         }
     }
     return res;
