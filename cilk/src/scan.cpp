@@ -3,7 +3,18 @@
 #include "scan.h"
 #include <cassert>
 
-// TODO: make in-place version
+int32_t scan_exclusive_sequential_inplace(raw_array<int32_t>& x)
+{
+    assert(x.is_valid() && x.get_size() > 0);
+    int32_t t = x[0];
+    x[0] = 0;
+    for (uint32_t i = 1; i < x.get_size(); ++i)
+    {
+        x[i] = x[i - 1] + t;
+    }
+    return x[x.size() - 1] + t;
+}
+
 std::pair<raw_array<int32_t>, int32_t> scan_exclusive_sequential(raw_array<int32_t> const& x)
 {
     assert(x.is_valid() && x.get_size() > 0);
@@ -51,8 +62,7 @@ std::pair<raw_array<int32_t>, int32_t> scan_exclusive_blocked(raw_array<int32_t>
         deltas[i] = psums[right - 1] + x[right - 1];
     }
 
-    raw_array<int32_t> psum_deltas = scan_exclusive_sequential(deltas).first;
-    assert(psum_deltas.is_valid() && psum_deltas.get_size() == deltas.get_size());
+    scan_exclusive_sequential_inplace(deltas);
 
     #pragma grainsize 1
     cilk_for (uint32_t i = 0; i < blocks_count; ++i)
@@ -65,7 +75,7 @@ std::pair<raw_array<int32_t>, int32_t> scan_exclusive_blocked(raw_array<int32_t>
         }
         for (uint32_t j = left; j < right; ++j)
         {
-            psums[j] += psum_deltas[i];
+            psums[j] += deltas[i];
         }
     }
     int32_t total_sum = psums[x.get_size() - 1] + x[x.get_size() - 1];
