@@ -11,18 +11,18 @@ uint64_t measure(std::default_random_engine& generator, std::uniform_int_distrib
     for (uint32_t i = 0; i < reps; ++i)
     {
         raw_array<int32_t> x(sz);
-        for (uint32_t j = 0; j < x.size(); ++j)
+        for (uint32_t j = 0; j < sz; ++j)
         {
             x[j] = elements_distribution(generator);
         }
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-        if (threads == 0)
+        if (blocks_count == 0)
         {
            scan_inclusive_sequential(x);
         }
         else
         {
-            scan_inclusive_blocked(v, blocks_count);
+            scan_inclusive_blocked(x, blocks_count);
         }
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         sum += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
