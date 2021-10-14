@@ -18,11 +18,11 @@ uint64_t measure(std::default_random_engine& generator, std::uniform_int_distrib
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         if (blocks_count == 0)
         {
-           scan_inclusive_sequential(x);
+           scan_exclusive_sequential(x);
         }
         else
         {
-            scan_inclusive_blocked(x, blocks_count);
+            scan_exclusive_blocked(x, blocks_count);
         }
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         sum += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();

@@ -4,7 +4,7 @@
 #include <cassert>
 
 // TODO: make in-place version
-std::pair<raw_array<int32_t>, int32_t> scan_inclusive_sequential(raw_array<int32_t> const& x)
+std::pair<raw_array<int32_t>, int32_t> scan_exclusive_sequential(raw_array<int32_t> const& x)
 {
     assert(x.is_valid() && x.get_size() > 0);
     raw_array<int32_t> psums(x.get_size());
@@ -17,7 +17,7 @@ std::pair<raw_array<int32_t>, int32_t> scan_inclusive_sequential(raw_array<int32
     return {std::move(psums), total_sum};
 }
 
-std::pair<raw_array<int32_t>, int32_t> scan_inclusive_blocked(raw_array<int32_t> const& x, uint32_t blocks_count)
+std::pair<raw_array<int32_t>, int32_t> scan_exclusive_blocked(raw_array<int32_t> const& x, uint32_t blocks_count)
 {
     assert(x.is_valid() && x.get_size() > 0);
 
@@ -51,7 +51,7 @@ std::pair<raw_array<int32_t>, int32_t> scan_inclusive_blocked(raw_array<int32_t>
         deltas[i] = psums[right - 1] + x[right - 1];
     }
 
-    raw_array<int32_t> psum_deltas = scan_inclusive_sequential(deltas).first;
+    raw_array<int32_t> psum_deltas = scan_exclusive_sequential(deltas).first;
     assert(psum_deltas.is_valid() && psum_deltas.get_size() == deltas.get_size());
 
     #pragma grainsize 1
