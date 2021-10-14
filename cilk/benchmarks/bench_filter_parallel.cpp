@@ -28,7 +28,7 @@ uint64_t measure(std::default_random_engine& generator, std::uniform_int_distrib
     std::function<bool(int32_t const&)> pred = [divisor](int32_t const& x)
     {
         return x % divisor == 0;
-    }
+    };
 
     for (uint32_t i = 0; i < reps; ++i)
     {
@@ -62,10 +62,10 @@ int main()
     uint64_t res = measure(generator, elements_distribution, sz, 0, reps, 5);
     std::cout << "Sequential, elapsed " << res << " milliseconds" << std::endl;
 
-    for (uint32_t i = 1; i <= 16; ++i)
+    for (uint32_t i = 10; i <= 160; i += 10)
     {
-        uint64_t res = measure(generator, elements_distribution, sz, i * 10, reps, 5);
-        std::cout << i * 10 << " blocks, elapsed " << res << " milliseconds" << std::endl;
+        uint64_t res = measure(generator, elements_distribution, sz, i, reps, 5);
+        std::cout << i << " blocks, elapsed " << res << " milliseconds" << std::endl;
     }
     return 0;
 }
