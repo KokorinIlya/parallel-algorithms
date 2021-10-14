@@ -15,7 +15,7 @@ TEST(parallel_filter, simple)
     {
         arr[i] = i;
     }
-    raw_array<int32_t> res = filter_parallel<int32_t, int32_t>(arr, &is_even, 10);
+    raw_array<int32_t> res = filter_parallel<int32_t>(arr, &is_even, 10);
     ASSERT_EQ(500, res.get_size());
     ASSERT_TRUE(res.is_valid());
     for (uint32_t i = 0; i < res.get_size(); ++i)

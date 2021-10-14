@@ -24,34 +24,34 @@ raw_array<T> filter_parallel(raw_array<T> const& vals, std::function<bool(T cons
 
     raw_array<int32_t> flags = map_parallel<T, int32_t>(
         vals,
-        [&mapper](val)
+        [&mapper](T const& val)
         {
             if (mapper(val))
             {
-                return 1
+                return 1;
             }
             else
             {
-                return 0
+                return 0;
             }
         },
         blocks_count
     );
     assert(flags.is_valid() && flags.get_size() == vals.get_size());
 
-    const [idxs, total_elems] = scan_exclusive_blocked(flags, blocks_count);
+    auto [idxs, total_elems] = scan_exclusive_blocked(flags, blocks_count);
     assert(idxs.is_valid() && idxs.get_size() == vals.get_size());
     
     raw_array<T> res(total_elems);
-    
+
     #pragma grainsize 1
     cilk_for (uint32_t i = 0; i < blocks_count; ++i)
     {
         uint32_t left = i * elements_per_block;
         uint32_t right = left + elements_per_block;
-        if (right > x.get_size())
+        if (right > vals.get_size())
         {
-            right = x.get_size();
+            right = vals.get_size();
         }
         for (uint32_t j = left; j < right; ++j)
         {
