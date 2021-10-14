@@ -12,7 +12,7 @@ int32_t scan_exclusive_sequential_inplace(raw_array<int32_t>& x)
     {
         x[i] = x[i - 1] + t;
     }
-    return x[x.size() - 1] + t;
+    return x[x.get_size() - 1] + t;
 }
 
 std::pair<raw_array<int32_t>, int32_t> scan_exclusive_sequential(raw_array<int32_t> const& x)
