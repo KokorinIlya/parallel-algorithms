@@ -58,7 +58,7 @@ int main()
     for (uint32_t i = 10; i <= 160; i += 10)
     {
         uint64_t res = measure(generator, elements_distribution, sz, i, reps);
-        std::cout << i * 10 << " blocks, elapsed " << res << " milliseconds" << std::endl;
+        std::cout << i << " blocks, elapsed " << res << " milliseconds" << std::endl;
     }
     return 0;
 }
