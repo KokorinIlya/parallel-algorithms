@@ -46,7 +46,7 @@ TEST(parallel_sort, stress)
             v[j] = x;
         }
         sort_parallel<int32_t>(arr, cur_block_size);
-        std::sort(v);
+        std::sort(v.begin(), v.end());
         for (uint32_t j = 0; j < cur_size; ++j)
         {
             ASSERT_EQ(arr[j], v[j]);
