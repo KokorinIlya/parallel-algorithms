@@ -40,6 +40,15 @@ TEST(blocked_scan, simple)
     }
 }
 
+TEST(blocked_scan, empty_array) 
+{
+    raw_array<int32_t> x(0);
+    auto [psums, total_sum] = scan_exclusive_blocked(x, 3);
+    ASSERT_EQ(0, total_sum);
+    ASSERT_EQ(nullptr, psums.get_raw_ptr());
+    ASSERT_EQ(0, psums.get_size());
+}
+
 TEST(blocked_scan, stress) 
 {
     uint32_t max_size = 100000;

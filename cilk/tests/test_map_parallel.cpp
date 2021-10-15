@@ -23,6 +23,14 @@ TEST(parallel_map, simple)
     }
 }
 
+TEST(parallel_map, empty_array) 
+{
+    raw_array<int32_t> arr(0);
+    raw_array<int32_t> res = map_parallel<int32_t, int32_t>(arr, &inc, 10);
+    ASSERT_EQ(nullptr, res.get_raw_ptr());
+    ASSERT_EQ(0, res.get_size());
+}
+
 TEST(parallel_map, stress) 
 {
     uint32_t max_size = 100000;
