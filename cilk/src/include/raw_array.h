@@ -30,6 +30,16 @@ public:
         other.ptr = nullptr;
     }
 
+    T* get_raw_ptr()
+    {
+        return ptr;
+    }
+
+    T const* get_raw_ptr() const
+    {
+        return ptr;
+    }
+
     T const& operator[](uint32_t idx) const 
     {
         return *(ptr + idx);
