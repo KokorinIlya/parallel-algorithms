@@ -57,9 +57,9 @@ void sort_parallel(raw_array<T>& arr, uint32_t seq_sort_threshold, uint32_t bloc
     uint32_t partitioner_idx = static_cast<uint32_t>(std::rand()) % arr.get_size();
     T const& partitioner = arr[partitioner_idx];
 
-    raw_array<T> le = cilk_spawn filter_parallel(arr, [&partitioner](T const& x) { return x <  partitioner; }, blocks_count);
-    raw_array<T> qe = cilk_spawn filter_parallel(arr, [&partitioner](T const& x) { return x == partitioner; }, blocks_count);
-    raw_array<T> gt =            filter_parallel(arr, [&partitioner](T const& x) { return x >  partitioner; }, blocks_count);
+    raw_array<T> le = cilk_spawn filter_parallel<T>(arr, [&partitioner](T const& x) { return x <  partitioner; }, blocks_count);
+    raw_array<T> eq = cilk_spawn filter_parallel<T>(arr, [&partitioner](T const& x) { return x == partitioner; }, blocks_count);
+    raw_array<T> gt =            filter_parallel<T>(arr, [&partitioner](T const& x) { return x >  partitioner; }, blocks_count);
     cilk_sync;
 
     cilk_spawn copy_parallel(le, arr, 0,                             blocks_count);
