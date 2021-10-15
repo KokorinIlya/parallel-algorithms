@@ -8,6 +8,5 @@ add_executable(run_tests.out
     test_raw_array.cpp
     test_map_parallel.cpp
     test_filter_parallel.cpp
-    test_sort_parallel.cpp
 )
 target_link_libraries(run_tests.out pthread cilkrts gtest gtest_main)
