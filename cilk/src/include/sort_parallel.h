@@ -13,11 +13,16 @@
 #include <cstdlib>
 #include <algorithm>
 #include <iostream>
+#include <ctime>
 
 template <typename T>
 void copy_parallel(raw_array<T> const& src, raw_array<T>& dst, uint32_t start_idx, uint32_t blocks_count)
 {
     assert(src.get_size() + start_idx <= dst.get_size());
+    if (src.get_size() == 0)
+    {
+        return;
+    }
 
     if (blocks_count > src.get_size())
     {
