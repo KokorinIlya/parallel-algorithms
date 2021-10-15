@@ -19,3 +19,4 @@ TEST(parallel_sort, simple)
         ASSERT_EQ(exp_res[i], arr[i]);
     }
 }
+

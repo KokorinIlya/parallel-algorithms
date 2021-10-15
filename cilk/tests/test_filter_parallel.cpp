@@ -71,7 +71,7 @@ TEST(parallel_filter, stress)
         raw_array<int32_t> arr(cur_size);
         for (uint32_t j = 0; j < cur_size; ++j)
         {
-            arr[i] = elements_distribution(generator);
+            arr[j] = elements_distribution(generator);
         }
         std::function<bool(int32_t const&)> pred = [cur_divider](int32_t const& x)
         {

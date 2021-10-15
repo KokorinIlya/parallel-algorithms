@@ -50,7 +50,7 @@ TEST(parallel_map, stress)
         raw_array<int32_t> arr(cur_size);
         for (uint32_t j = 0; j < cur_size; ++j)
         {
-            arr[i] = elements_distribution(generator);
+            arr[j] = elements_distribution(generator);
         }
         raw_array<int32_t> res = map_parallel<int32_t, int32_t>(arr, &inc, cur_blocks);
         ASSERT_EQ(arr.get_size(), res.get_size());
