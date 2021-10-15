@@ -80,9 +80,9 @@ TEST(parallel_filter, stress)
         raw_array<int32_t> res = filter_parallel<int32_t>(arr, pred, cur_blocks);
         std::vector<int32_t> exp_res = filter_sequential(arr, pred);
         ASSERT_EQ(exp_res.size(), res.get_size());
-        for (uint32_t i = 0; i < res.get_size(); ++i)
+        for (uint32_t j = 0; j < res.get_size(); ++j)
         {
-            ASSERT_EQ(res[i], exp_res[i]);
+            ASSERT_EQ(res[j], exp_res[j]);
         }
     }
 }

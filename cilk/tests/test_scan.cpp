@@ -75,9 +75,9 @@ TEST(blocked_scan, stress)
         auto [psums, total_sum] = scan_exclusive_blocked(x, cur_blocks);
         ASSERT_EQ(psums_expected.get_size(), psums.get_size());
         ASSERT_EQ(cur_size, psums.get_size());
-        for (uint32_t i = 0; i < cur_size; ++i)
+        for (uint32_t j = 0; j < cur_size; ++j)
         {
-            ASSERT_EQ(psums_expected[i], psums[i]);
+            ASSERT_EQ(psums_expected[j], psums[j]);
         }
     }
 }

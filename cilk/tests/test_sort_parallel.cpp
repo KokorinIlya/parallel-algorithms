@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <random>
 #include <vector>
+#include <algorithm>
 
 TEST(parallel_sort, simple)
 {
@@ -20,3 +21,35 @@ TEST(parallel_sort, simple)
     }
 }
 
+TEST(parallel_sort, stress) 
+{
+    uint32_t max_size = 100000;
+    uint32_t max_block_size = 200;
+    uint32_t tests_count = 200;
+
+    std::default_random_engine generator(time(nullptr));
+    std::uniform_int_distribution<uint32_t> size_distribution(1, max_size);
+    std::uniform_int_distribution<uint32_t> block_size_distribution(10, max_block_size);
+    std::uniform_int_distribution<int32_t> elements_distribution(-1000000, 1000000);
+
+    for (uint32_t i = 0; i < tests_count; ++i)
+    {
+        uint32_t cur_size = size_distribution(generator);
+        uint32_t cur_block_size = block_size_distribution(generator);
+
+        raw_array<int32_t> arr(cur_size);
+        std::vector<int32_t> v(cur_size);
+        for (uint32_t j = 0; j < cur_size; ++j)
+        {
+            int32_t x = elements_distribution(generator);
+            arr[j] = x;
+            v[j] = x;
+        }
+        sort_parallel<int32_t>(arr, cur_block_size);
+        std::sort(v);
+        for (uint32_t j = 0; j < cur_size; ++j)
+        {
+            ASSERT_EQ(arr[j], v[j]);
+        }
+    }
+}
