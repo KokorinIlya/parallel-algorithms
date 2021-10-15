@@ -17,7 +17,6 @@ TEST(parallel_map, simple)
     }
     raw_array<int32_t> res = map_parallel<int32_t, int32_t>(arr, &inc, 10);
     ASSERT_EQ(arr.get_size(), res.get_size());
-    ASSERT_TRUE(res.is_valid());
     for (uint32_t i = 0; i < res.get_size(); ++i)
     {
         ASSERT_EQ(res[i], inc(arr[i]));
@@ -47,7 +46,6 @@ TEST(parallel_map, stress)
         }
         raw_array<int32_t> res = map_parallel<int32_t, int32_t>(arr, &inc, cur_blocks);
         ASSERT_EQ(arr.get_size(), res.get_size());
-        ASSERT_TRUE(res.is_valid());
         for (uint32_t i = 0; i < res.get_size(); ++i)
         {
             ASSERT_EQ(res[i], inc(arr[i]));

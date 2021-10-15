@@ -13,7 +13,11 @@
 template <typename T>
 raw_array<T> filter_parallel(raw_array<T> const& vals, std::function<bool(T const&)> pred, uint32_t blocks_count)
 {
-    assert(vals.is_valid() && vals.get_size() > 0);
+    assert(blocks_count > 0);
+    if (vals.get_size() == 0)
+    {
+        return raw_array<T>(0);
+    }
 
     if (blocks_count > vals.get_size())
     {
@@ -40,10 +44,10 @@ raw_array<T> filter_parallel(raw_array<T> const& vals, std::function<bool(T cons
         },
         blocks_count
     );
-    assert(flags.is_valid() && flags.get_size() == vals.get_size());
+    assert(flags.get_size() == vals.get_size());
 
     auto [idxs, total_elems] = scan_exclusive_blocked(flags, blocks_count);
-    assert(idxs.is_valid() && idxs.get_size() == vals.get_size());
+    assert(idxs.get_size() == vals.get_size());
     
     raw_array<T> res(total_elems);
 

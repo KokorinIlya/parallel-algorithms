@@ -16,8 +16,7 @@
 template <typename T>
 void copy_parallel(raw_array<T> const& src, raw_array<T>& dst, uint32_t start_idx, uint32_t blocks_count)
 {
-    assert(src.is_valid() && src.get_size() > 0);
-    assert(dst.is_valid() && src.get_size() + start_idx <= dst.get_size());
+    assert(src.get_size() + start_idx <= dst.get_size());
 
     if (blocks_count > src.get_size())
     {
@@ -47,7 +46,10 @@ void copy_parallel(raw_array<T> const& src, raw_array<T>& dst, uint32_t start_id
 template <typename T>
 void sort_parallel(raw_array<T>& arr, uint32_t seq_sort_threshold, uint32_t blocks_count)
 {
-    assert(arr.is_valid() && arr.get_size() > 0);
+    if (arr.get_size() == 0)
+    {
+        return;
+    }
     if (arr.get_size() <= seq_sort_threshold)
     {
         T* data_ptr = arr.get_raw_ptr();

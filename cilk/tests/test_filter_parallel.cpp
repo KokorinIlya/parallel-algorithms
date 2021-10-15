@@ -15,7 +15,6 @@ template <typename T>
 std::vector<T> filter_sequential(raw_array<T> const& vals, std::function<bool(T const&)> pred)
 {
     std::vector<T> res;
-    assert(vals.is_valid() && vals.get_size() > 0);
     for (uint32_t i = 0; i < vals.get_size(); ++i)
     {
         if (pred(vals[i]))
@@ -36,7 +35,6 @@ TEST(parallel_filter, simple)
     }
     raw_array<int32_t> res = filter_parallel<int32_t>(arr, &is_even, 10);
     ASSERT_EQ(500, res.get_size());
-    ASSERT_TRUE(res.is_valid());
     for (uint32_t i = 0; i < res.get_size(); ++i)
     {
         ASSERT_EQ(i * 2, res[i]);
@@ -74,7 +72,6 @@ TEST(parallel_filter, stress)
         raw_array<int32_t> res = filter_parallel<int32_t>(arr, pred, cur_blocks);
         std::vector<int32_t> exp_res = filter_sequential(arr, pred);
         ASSERT_EQ(exp_res.size(), res.get_size());
-        ASSERT_TRUE(res.is_valid());
         for (uint32_t i = 0; i < res.get_size(); ++i)
         {
             ASSERT_EQ(res[i], exp_res[i]);

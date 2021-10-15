@@ -76,8 +76,14 @@ TEST(raw_array, move_array)
     raw_array<int32_t> arr(10);
     arr[5] = 15;
     raw_array<int32_t> arr_moved(std::move(arr));
-    ASSERT_FALSE(arr.is_valid());
-    ASSERT_TRUE(arr_moved.is_valid());
+    ASSERT_EQ(arr.get_raw_ptr(), nullptr);
+    ASSERT_TRUE(arr_moved.get_raw_ptr() != nullptr);
     ASSERT_EQ(arr_moved[5], 15);
+}
+
+TEST(raw_array, create_empty_array)
+{
+    raw_array<int32_t> arr(0);
+    ASSERT_EQ(arr.get_raw_ptr(), nullptr);
 }
 

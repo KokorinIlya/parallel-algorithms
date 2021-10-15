@@ -1,11 +1,13 @@
 #include <cilk/cilk.h>
 #include <cilk/cilk_api.h>
 #include "scan.h"
-#include <cassert>
 
 int32_t scan_exclusive_sequential_inplace(raw_array<int32_t>& x)
 {
-    assert(x.is_valid() && x.get_size() > 0);
+    if (x.get_size() == 0)
+    {
+        return 0;
+    }
     int32_t t = x[0];
     x[0] = 0;
     for (uint32_t i = 1; i < x.get_size(); ++i)
@@ -19,7 +21,10 @@ int32_t scan_exclusive_sequential_inplace(raw_array<int32_t>& x)
 
 std::pair<raw_array<int32_t>, int32_t> scan_exclusive_sequential(raw_array<int32_t> const& x)
 {
-    assert(x.is_valid() && x.get_size() > 0);
+    if (x.get_size() == 0)
+    {
+        return {raw_array<int32_t>(0), 0};
+    }
     raw_array<int32_t> psums(x.get_size());
     psums[0] = 0;
     for (uint32_t i = 1; i < x.get_size(); ++i)
@@ -32,7 +37,10 @@ std::pair<raw_array<int32_t>, int32_t> scan_exclusive_sequential(raw_array<int32
 
 std::pair<raw_array<int32_t>, int32_t> scan_exclusive_blocked(raw_array<int32_t> const& x, uint32_t blocks_count)
 {
-    assert(x.is_valid() && x.get_size() > 0);
+    if (x.get_size() == 0)
+    {
+        return {raw_array<int32_t>(0), 0};
+    }
 
     if (blocks_count > x.get_size())
     {

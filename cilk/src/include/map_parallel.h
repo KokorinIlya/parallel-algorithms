@@ -6,12 +6,14 @@
 #include <cilk/cilk_api.h>
 #include <functional>
 #include <cstdint>
-#include <cassert>
 
 template <typename F, typename T>
 raw_array<T> map_parallel(raw_array<F> const& from, std::function<T(F const&)> mapper, uint32_t blocks_count)
 {
-    assert(from.is_valid() && from.get_size() > 0 && blocks_count > 0);
+    if (from.get_size() == 0)
+    {
+        return raw_array<T>(0);
+    }
 
     if (blocks_count > from.get_size())
     {

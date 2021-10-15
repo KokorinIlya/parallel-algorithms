@@ -10,17 +10,25 @@ struct raw_array
 {
 public:
     raw_array(uint32_t _size) : size(_size),
-                                ptr(static_cast<T*>(::operator new(sizeof(T) * _size))) 
+                                ptr(nullptr) 
     {
         static_assert(std::is_trivially_destructible<T>::value, "Type parameter should be trivially destructible");
+        if (size > 0)
+        {
+            ptr = static_cast<T*>(::operator new(sizeof(T) * _size));
+        }
     }
 
     raw_array(raw_array<T> const& other) : size(other.size),
-                                           ptr(static_cast<T*>(::operator new(sizeof(T) * other.size))) 
+                                           ptr(nullptr) 
     {
-        for (uint32_t i = 0; i < other.size; ++i)
+        if (size > 0)
         {
-            *(ptr + i) = other[i];
+            ptr = static_cast<T*>(::operator new(sizeof(T) * other.size));
+            for (uint32_t i = 0; i < other.size; ++i)
+            {
+                *(ptr + i) = other[i];
+            }
         }
     }
 
@@ -28,6 +36,7 @@ public:
                                        ptr(other.ptr) 
     {
         other.ptr = nullptr;
+        other.size = 0;
     }
 
     T* get_raw_ptr()
@@ -53,11 +62,6 @@ public:
     uint32_t get_size() const
     {
         return size;
-    }
-
-    bool is_valid() const
-    {
-        return ptr != nullptr;
     }
 
     ~raw_array()

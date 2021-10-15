@@ -10,7 +10,6 @@ template <typename T>
 std::vector<T> filter_sequential(raw_array<T> const& vals, std::function<bool(T const&)> pred)
 {
     std::vector<T> res;
-    assert(vals.is_valid() && vals.get_size() > 0);
     for (uint32_t i = 0; i < vals.get_size(); ++i)
     {
         if (pred(vals[i]))
