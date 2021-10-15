@@ -12,6 +12,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <algorithm>
+#include <iostream>
 
 template <typename T>
 void copy_parallel(raw_array<T> const& src, raw_array<T>& dst, uint32_t start_idx, uint32_t blocks_count)
@@ -46,6 +47,13 @@ void copy_parallel(raw_array<T> const& src, raw_array<T>& dst, uint32_t start_id
 template <typename T>
 void sort_parallel(raw_array<T>& arr, uint32_t seq_sort_threshold, uint32_t blocks_count)
 {
+    std::cout << "ARR: [";
+    for (uint32_t i = 0; i < arr.get_size(); ++i)
+    {
+        std::cout << arr[i] << " ";
+    }
+    std::cout << "]" << std::endl;
+
     if (arr.get_size() == 0)
     {
         return;
