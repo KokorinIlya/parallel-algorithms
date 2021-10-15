@@ -1,3 +1,6 @@
+#ifndef MAP_PARALLEL_H
+#define MAP_PARALLEL_H
+
 #include "raw_array.h"
 #include <cilk/cilk.h>
 #include <cilk/cilk_api.h>
@@ -38,3 +41,5 @@ raw_array<T> map_parallel(raw_array<F> const& from, std::function<T(F const&)> m
     }
     return result;
 }
+
+#endif

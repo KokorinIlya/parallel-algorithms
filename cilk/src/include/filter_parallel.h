@@ -1,3 +1,6 @@
+#ifndef FILTER_PARALLEL_H
+#define FILTER_PARALLEL_H
+
 #include "raw_array.h"
 #include "map_parallel.h"
 #include "scan.h"
@@ -64,3 +67,4 @@ raw_array<T> filter_parallel(raw_array<T> const& vals, std::function<bool(T cons
     return res;
 }
 
+#endif
