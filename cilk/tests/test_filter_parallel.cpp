@@ -41,7 +41,7 @@ TEST(parallel_filter, simple)
     }
 }
 
-TEST(parallel_map, empty_array) 
+TEST(parallel_filter, empty_array) 
 {
     raw_array<int32_t> arr(0);
     raw_array<int32_t> res = filter_parallel<int32_t>(arr, &is_even, 10);
