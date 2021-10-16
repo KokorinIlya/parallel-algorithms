@@ -49,20 +49,6 @@ void copy_parallel(raw_array<T> const& src, raw_array<T>& dst, uint32_t start_id
 }
 
 template <typename T>
-void copy_sequential(raw_array<T> const& src, raw_array<T>& dst, uint32_t start_idx)
-{
-    assert(src.get_size() + start_idx <= dst.get_size());
-    if (src.get_size() == 0)
-    {
-        return;
-    }
-    for (uint32_t i = 0; i < src.get_size(); ++i)
-    {
-        dst[start_idx + i] = src[i];
-    }
-}
-
-template <typename T>
 void print_arr(raw_array<T> const& arr, std::string const& name)
 {
     std::cout << name << "= [";
