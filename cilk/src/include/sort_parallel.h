@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <iostream>
 #include <ctime>
+#include <string>
 
 template <typename T>
 void copy_parallel(raw_array<T> const& src, raw_array<T>& dst, uint32_t start_idx, uint32_t seq_block_size)
@@ -61,8 +62,20 @@ void copy_sequential(raw_array<T> const& src, raw_array<T>& dst, uint32_t start_
 }
 
 template <typename T>
+void print_arr(raw_array<T> const& arr, std::string const& name)
+{
+    std::cout << name << " [";
+    for (uint32_t i = 0; i < arr.get_size(); ++i)
+    {
+        std::cout << arr[i] << " ";
+    }
+    std::cout << "]" << std::endl;
+}
+
+template <typename T>
 void do_sort_parallel(raw_array<T>& arr, uint32_t seq_block_size)
 {
+    print_arr(arr, "ARR");
     if (arr.get_size() == 0)
     {
         return;
