@@ -104,7 +104,7 @@ void do_sort_parallel(raw_array<T>& arr, uint32_t seq_block_size)
     );
     print_arr(le, "LE");
     print_arr(eq, "EQ");
-    print_arr(ge, "GE");
+    print_arr(gt, "GE");
     /*cilk_sync;*/
 
     /*cilk_spawn*/ do_sort_parallel(le, seq_block_size);
