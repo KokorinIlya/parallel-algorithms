@@ -30,7 +30,7 @@ TEST(parallel_sort, stress)
 
     std::default_random_engine generator(time(nullptr));
     std::uniform_int_distribution<uint32_t> size_distribution(1, max_size);
-    std::uniform_int_distribution<uint32_t> block_size_distribution(2, 5);
+    std::uniform_int_distribution<uint32_t> block_size_distribution(20, 100);
     std::uniform_int_distribution<int32_t> elements_distribution(-1000000, 1000000);
 
     for (uint32_t i = 0; i < tests_count; ++i)
