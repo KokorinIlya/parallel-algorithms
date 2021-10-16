@@ -96,15 +96,15 @@ void do_sort_parallel(raw_array<T>& arr, uint32_t seq_block_size)
     raw_array<T> le = /*cilk_spawn*/ filter_parallel<T>(
         arr, [&partitioner](T const& x) { return x <  partitioner; }, blocks_count
     );
+    print_arr(le, "LE");
     raw_array<T> eq = /*cilk_spawn*/ filter_parallel<T>(
         arr, [&partitioner](T const& x) { return x == partitioner; }, blocks_count
     );
+    print_arr(eq, "EQ");
     raw_array<T> gt =            filter_parallel<T>(
         arr, [&partitioner](T const& x) { return x >  partitioner; }, blocks_count
     );
-    print_arr(le, "LE");
-    print_arr(eq, "EQ");
-    print_arr(gt, "GE");
+    print_arr(gt, "GT");
     /*cilk_sync;*/
 
     /*cilk_spawn*/ do_sort_parallel(le, seq_block_size);
