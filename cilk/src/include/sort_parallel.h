@@ -129,17 +129,10 @@ void do_sort_parallel(raw_array<T>& arr, uint32_t seq_block_size)
                do_sort_parallel(gt, seq_block_size);
     cilk_sync;
 
-    cilk_spawn copy_sequential(le, arr, 0);
-    cilk_spawn copy_sequential(eq, arr, le.get_size());
-               copy_sequential(gt, arr, le.get_size() + eq.get_size());
-    cilk_sync;
-
-    /*
     cilk_spawn copy_parallel(le, arr, 0,                             seq_block_size);
     cilk_spawn copy_parallel(eq, arr, le.get_size(),                 seq_block_size);
                copy_parallel(gt, arr, le.get_size() + eq.get_size(), seq_block_size);
     cilk_sync;
-    */
 }
 
 
