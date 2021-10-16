@@ -75,7 +75,7 @@ void print_arr(raw_array<T> const& arr, std::string const& name)
 template <typename T>
 void do_sort_parallel(raw_array<T>& arr, uint32_t seq_block_size)
 {
-    //print_arr(arr, "ARR");
+    print_arr(arr, "ARR");
     if (arr.get_size() == 0)
     {
         return;
@@ -89,7 +89,7 @@ void do_sort_parallel(raw_array<T>& arr, uint32_t seq_block_size)
     uint32_t partitioner_idx = static_cast<uint32_t>(std::rand()) % arr.get_size();
     T const& partitioner = arr[partitioner_idx];
 
-    //std::cout << "PART = " << partitioner << std::endl;
+    std::cout << "PART = " << partitioner << std::endl;
 
     uint32_t blocks_count = arr.get_size() / seq_block_size;
 
@@ -102,6 +102,9 @@ void do_sort_parallel(raw_array<T>& arr, uint32_t seq_block_size)
     raw_array<T> gt =            filter_parallel<T>(
         arr, [&partitioner](T const& x) { return x >  partitioner; }, blocks_count
     );
+    print_arr(le, "LE");
+    print_arr(eq, "EQ");
+    print_arr(ge, "GE");
     /*cilk_sync;*/
 
     /*cilk_spawn*/ do_sort_parallel(le, seq_block_size);
