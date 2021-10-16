@@ -23,14 +23,14 @@ TEST(parallel_sort, simple)
 
 TEST(parallel_sort, stress) 
 {
-    uint32_t max_size = 100000;
-    uint32_t max_block_size = 200;
+    uint32_t max_size = 20;
+    uint32_t max_block_size = 10;
     uint32_t tests_count = 200;
 
     std::default_random_engine generator(time(nullptr));
     std::uniform_int_distribution<uint32_t> size_distribution(1, max_size);
-    std::uniform_int_distribution<uint32_t> block_size_distribution(10, max_block_size);
-    std::uniform_int_distribution<int32_t> elements_distribution(-1000000, 1000000);
+    std::uniform_int_distribution<uint32_t> block_size_distribution(2, max_block_size);
+    std::uniform_int_distribution<int32_t> elements_distribution(-100, 100);
 
     for (uint32_t i = 0; i < tests_count; ++i)
     {
