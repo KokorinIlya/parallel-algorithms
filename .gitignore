@@ -1,6 +1,6 @@
 *.out
 bin
-./include
+/cilk/include
 lib
 libexec
 share
