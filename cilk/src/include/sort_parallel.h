@@ -82,7 +82,6 @@ raw_array<T> filter_sequential(raw_array<T> const& vals, std::function<bool(T co
 template <typename T>
 void do_sort_parallel(raw_array<T>& arr, uint32_t seq_block_size)
 {
-    //print_arr(arr, "ARR");
     if (arr.get_size() == 0)
     {
         return;
@@ -95,8 +94,6 @@ void do_sort_parallel(raw_array<T>& arr, uint32_t seq_block_size)
     }
     uint32_t partitioner_idx = static_cast<uint32_t>(std::rand()) % arr.get_size();
     T const& partitioner = arr[partitioner_idx];
-
-    //std::cout << "PART = " << partitioner << std::endl;
 
     uint32_t blocks_count = arr.get_size() / seq_block_size;
 
