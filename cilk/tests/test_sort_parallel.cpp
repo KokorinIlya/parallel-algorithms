@@ -35,7 +35,6 @@ TEST(parallel_sort, stress)
 
     for (uint32_t i = 0; i < tests_count; ++i)
     {
-        //std::cout << "TEST#" << i << std::endl;
         uint32_t cur_size = size_distribution(generator);
         uint32_t cur_block_size = block_size_distribution(generator);
 

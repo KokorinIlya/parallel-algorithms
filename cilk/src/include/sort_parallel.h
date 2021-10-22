@@ -49,26 +49,6 @@ void copy_parallel(raw_array<T> const& src, raw_array<T>& dst, uint32_t start_id
 }
 
 template <typename T>
-raw_array<T> filter_sequential(raw_array<T> const& vals, std::function<bool(T const&)> pred)
-{
-    std::vector<T> v;
-    for (uint32_t i = 0; i < vals.get_size(); ++i)
-    {
-        T const& t = vals[i];
-        if (pred(t))
-        {
-            v.push_back(t);
-        }
-    }
-    raw_array<T> res(v.size());
-    for (uint32_t i = 0; i < v.size(); ++i)
-    {
-        res[i] = v[i];
-    }
-    return res;
-}
-
-template <typename T>
 void do_sort_parallel(raw_array<T>& arr, uint32_t seq_block_size)
 {
     if (arr.get_size() == 0)
