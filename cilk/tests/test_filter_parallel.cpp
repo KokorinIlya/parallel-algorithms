@@ -53,7 +53,7 @@ TEST(parallel_filter, stress)
 {
     uint32_t max_size = 100000;
     uint32_t max_blocks = 20;
-    uint32_t tests_count = 200;
+    uint32_t tests_count = 2000;
     uint32_t max_divider = 10000;
 
     std::default_random_engine generator(time(nullptr));

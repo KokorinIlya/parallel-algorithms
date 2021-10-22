@@ -53,7 +53,7 @@ TEST(blocked_scan, stress)
 {
     uint32_t max_size = 100000;
     uint32_t max_blocks = 20;
-    uint32_t tests_count = 200;
+    uint32_t tests_count = 2000;
 
     std::default_random_engine generator(time(nullptr));
     std::uniform_int_distribution<uint32_t> size_distribution(1, max_size);

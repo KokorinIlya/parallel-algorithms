@@ -32,8 +32,9 @@ public:
         }
     }
 
-    raw_array(raw_array<T>&& other) :  size(other.size),
-                                       ptr(other.ptr) 
+    raw_array(raw_array<T>&& other) noexcept : 
+        size(other.size),
+        ptr(other.ptr) 
     {
         other.ptr = nullptr;
         other.size = 0;

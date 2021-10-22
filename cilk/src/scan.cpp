@@ -1,6 +1,7 @@
 #include <cilk/cilk.h>
 #include <cilk/cilk_api.h>
 #include "scan.h"
+#include <cassert>
 
 int32_t scan_exclusive_sequential_inplace(raw_array<int32_t>& x)
 {
@@ -12,7 +13,7 @@ int32_t scan_exclusive_sequential_inplace(raw_array<int32_t>& x)
     x[0] = 0;
     for (uint32_t i = 1; i < x.get_size(); ++i)
     {
-        uint32_t next_t = x[i];
+        int32_t next_t = x[i];
         x[i] = x[i - 1] + t;
         t = next_t;
     }
@@ -51,6 +52,7 @@ std::pair<raw_array<int32_t>, int32_t> scan_exclusive_blocked(raw_array<int32_t>
     {
         ++elements_per_block;
     }
+    assert(elements_per_block >= 1);
 
     raw_array<int32_t> psums(x.get_size());
     raw_array<int32_t> deltas(blocks_count);
@@ -64,12 +66,15 @@ std::pair<raw_array<int32_t>, int32_t> scan_exclusive_blocked(raw_array<int32_t>
         {
             right = x.get_size();
         }
-        psums[left] = 0;
-        for (uint32_t j = left + 1; j < right; ++j)
+        if (left < right)
         {
-            psums[j] = psums[j - 1] + x[j - 1];
+            psums[left] = 0;
+            for (uint32_t j = left + 1; j < right; ++j)
+            {
+                psums[j] = psums[j - 1] + x[j - 1];
+            }
+            deltas[i] = psums[right - 1] + x[right - 1];
         }
-        deltas[i] = psums[right - 1] + x[right - 1];
     }
 
     scan_exclusive_sequential_inplace(deltas);

@@ -49,17 +49,6 @@ void copy_parallel(raw_array<T> const& src, raw_array<T>& dst, uint32_t start_id
 }
 
 template <typename T>
-void print_arr(raw_array<T> const& arr, std::string const& name)
-{
-    std::cout << name << "= [";
-    for (uint32_t i = 0; i < arr.get_size(); ++i)
-    {
-        std::cout << arr[i] << " ";
-    }
-    std::cout << "]" << std::endl;
-}
-
-template <typename T>
 raw_array<T> filter_sequential(raw_array<T> const& vals, std::function<bool(T const&)> pred)
 {
     std::vector<T> v;
@@ -97,14 +86,14 @@ void do_sort_parallel(raw_array<T>& arr, uint32_t seq_block_size)
 
     uint32_t blocks_count = arr.get_size() / seq_block_size;
 
-    raw_array<T> le = cilk_spawn filter_sequential<T>(
-        arr, [&partitioner](T const& x) { return x <  partitioner; }//, blocks_count
+    raw_array<T> le = cilk_spawn filter_parallel<T>(
+        arr, [&partitioner](T const& x) { return x <  partitioner; }, blocks_count
     );
-    raw_array<T> eq = cilk_spawn filter_sequential<T>(
-        arr, [&partitioner](T const& x) { return x == partitioner; }//, blocks_count
+    raw_array<T> eq = cilk_spawn filter_parallel<T>(
+        arr, [&partitioner](T const& x) { return x == partitioner; }, blocks_count
     );
-    raw_array<T> gt =            filter_sequential<T>(
-        arr, [&partitioner](T const& x) { return x >  partitioner; }//, blocks_count
+    raw_array<T> gt =            filter_parallel<T>(
+        arr, [&partitioner](T const& x) { return x >  partitioner; }, blocks_count
     );
     cilk_sync;
 
