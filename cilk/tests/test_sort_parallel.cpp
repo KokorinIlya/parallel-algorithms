@@ -13,6 +13,7 @@ void test_simple(bool parallel)
     {
         arr[i] = v[i];
     }
+    
     if (parallel)
     {
         sort_parallel<int32_t>(arr, 3);
