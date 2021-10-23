@@ -55,7 +55,7 @@ void stress_filter(
 {
     uint32_t max_size = 100000;
     uint32_t max_blocks = 160;
-    uint32_t tests_count = 2000;
+    uint32_t tests_count = 200;
     uint32_t max_divider = 10000;
 
     std::uniform_int_distribution<uint32_t> size_distribution(1, max_size);

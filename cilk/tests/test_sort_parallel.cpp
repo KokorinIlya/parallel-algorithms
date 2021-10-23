@@ -1,12 +1,11 @@
 #include <gtest/gtest.h>
-#include "sort_parallel.h"
+#include "sort.h"
 #include <cstdint>
 #include <random>
 #include <vector>
 #include <algorithm>
-#include <iostream>
 
-TEST(parallel_sort, simple)
+void test_simple(bool parallel)
 {
     std::vector<int32_t> v({1, 3, 3, 7, -2, 5, 2, 4, 6, -8});
     raw_array<int32_t> arr(v.size());
@@ -14,7 +13,15 @@ TEST(parallel_sort, simple)
     {
         arr[i] = v[i];
     }
-    sort_parallel<int32_t>(arr, 3);
+    if (parallel)
+    {
+        sort_parallel<int32_t>(arr, 3);
+    }
+    else
+    {
+        sort_sequential<int32_t>(arr);
+    }
+    
     std::vector<int32_t> exp_res({-8, -2, 1, 2, 3, 3, 4, 5, 6, 7});
     for (uint32_t i = 0; i < exp_res.size(); ++i)
     {
@@ -22,10 +29,20 @@ TEST(parallel_sort, simple)
     }
 }
 
-TEST(parallel_sort, stress) 
+TEST(parallel_sort, simple)
+{
+    test_simple(true);
+}
+
+TEST(sequential_sort, simple)
+{
+    test_simple(false);
+}
+
+void test_sort(bool parallel)
 {
     uint32_t max_size = 100000;
-    uint32_t tests_count = 2000;
+    uint32_t tests_count = 200;
 
     std::default_random_engine generator(time(nullptr));
     std::uniform_int_distribution<uint32_t> size_distribution(1, max_size);
@@ -45,11 +62,28 @@ TEST(parallel_sort, stress)
             arr[j] = x;
             v[j] = x;
         }
-        sort_parallel<int32_t>(arr, cur_block_size);
+        if (parallel)
+        {
+            sort_parallel<int32_t>(arr, cur_block_size);
+        }
+        else
+        {
+            sort_sequential<int32_t>(arr);
+        }
         std::sort(v.begin(), v.end());
         for (uint32_t j = 0; j < cur_size; ++j)
         {
             ASSERT_EQ(arr[j], v[j]);
         }
     }
+}
+
+TEST(parallel_sort, stress) 
+{
+    test_sort(true);
+}
+
+TEST(sequential_sort, stress) 
+{
+    test_sort(false);
 }
