@@ -34,7 +34,7 @@ TEST(parallel_map, empty_array)
 TEST(parallel_map, stress) 
 {
     uint32_t max_size = 100000;
-    uint32_t max_blocks = 20;
+    uint32_t max_blocks = 160;
     uint32_t tests_count = 2000;
 
     std::default_random_engine generator(time(nullptr));

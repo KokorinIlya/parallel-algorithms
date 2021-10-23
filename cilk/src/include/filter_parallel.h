@@ -19,10 +19,6 @@ raw_array<T> filter_parallel(raw_array<T> const& vals, std::function<bool(T cons
         return raw_array<T>(0);
     }
 
-    if (blocks_count > vals.get_size())
-    {
-        blocks_count = vals.get_size();
-    }
     uint32_t elements_per_block = vals.get_size() / blocks_count;
     if (vals.get_size() % blocks_count != 0)
     {

@@ -25,7 +25,6 @@ TEST(parallel_sort, simple)
 TEST(parallel_sort, stress) 
 {
     uint32_t max_size = 100000;
-    uint32_t max_block_size = 100;
     uint32_t tests_count = 2000;
 
     std::default_random_engine generator(time(nullptr));

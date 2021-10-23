@@ -15,10 +15,6 @@ raw_array<T> map_parallel(raw_array<F> const& from, std::function<T(F const&)> m
         return raw_array<T>(0);
     }
 
-    if (blocks_count > from.get_size())
-    {
-        blocks_count = from.get_size();
-    }
     uint32_t elements_per_block = from.get_size() / blocks_count;
     if (from.get_size() % blocks_count != 0)
     {

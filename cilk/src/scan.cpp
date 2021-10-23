@@ -43,10 +43,6 @@ std::pair<raw_array<int32_t>, int32_t> scan_exclusive_blocked(raw_array<int32_t>
         return {raw_array<int32_t>(0), 0};
     }
 
-    if (blocks_count > x.get_size())
-    {
-        blocks_count = x.get_size();
-    }
     uint32_t elements_per_block = x.get_size() / blocks_count;
     if (x.get_size() % blocks_count != 0)
     {
@@ -74,6 +70,10 @@ std::pair<raw_array<int32_t>, int32_t> scan_exclusive_blocked(raw_array<int32_t>
                 psums[j] = psums[j - 1] + x[j - 1];
             }
             deltas[i] = psums[right - 1] + x[right - 1];
+        }
+        else
+        {
+            assert(right == x.get_size());
         }
     }
 
