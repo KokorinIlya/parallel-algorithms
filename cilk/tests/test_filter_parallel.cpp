@@ -5,6 +5,7 @@
 #include <vector>
 #include <functional>
 #include <cassert>
+#include "constants.h"
 
 bool is_even(int32_t const& x)
 {
@@ -55,7 +56,6 @@ void stress_filter(
 {
     uint32_t max_size = 100000;
     uint32_t max_blocks = 160;
-    uint32_t tests_count = 200;
     uint32_t max_divider = 10000;
 
     std::uniform_int_distribution<uint32_t> size_distribution(1, max_size);
@@ -63,7 +63,7 @@ void stress_filter(
     std::uniform_int_distribution<uint32_t> dividers_distribution(1, max_divider);
     std::uniform_int_distribution<int32_t> elements_distribution(-max_abs_elem, max_abs_elem);
 
-    for (uint32_t i = 0; i < tests_count; ++i)
+    for (uint32_t i = 0; i < TESTS_COUNT; ++i)
     {
         uint32_t cur_size = size_distribution(generator);
         uint32_t cur_blocks = blocks_distribution(generator);

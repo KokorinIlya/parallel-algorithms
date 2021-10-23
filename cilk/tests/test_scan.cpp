@@ -3,6 +3,7 @@
 #include "raw_array.h"
 #include <random>
 #include <vector>
+#include "constants.h"
 
 TEST(sequential_scan, simple) 
 {
@@ -53,14 +54,13 @@ TEST(blocked_scan, stress)
 {
     uint32_t max_size = 100000;
     uint32_t max_blocks = 160;
-    uint32_t tests_count = 200;
 
     std::default_random_engine generator(time(nullptr));
     std::uniform_int_distribution<uint32_t> size_distribution(1, max_size);
     std::uniform_int_distribution<uint32_t> blocks_distribution(1, max_blocks);
     std::uniform_int_distribution<int32_t> elements_distribution(-1000, 1000);
 
-    for (uint32_t i = 0; i < tests_count; ++i)
+    for (uint32_t i = 0; i < TESTS_COUNT; ++i)
     {
         uint32_t cur_size = size_distribution(generator);
         uint32_t cur_blocks = blocks_distribution(generator);

@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include "constants.h"
 #include "sort.h"
 #include <cstdint>
 #include <random>
@@ -13,7 +14,7 @@ void test_simple(bool parallel)
     {
         arr[i] = v[i];
     }
-    
+
     if (parallel)
     {
         sort_parallel<int32_t>(arr, 3);
@@ -43,14 +44,13 @@ TEST(sequential_sort, simple)
 void test_sort(bool parallel)
 {
     uint32_t max_size = 100000;
-    uint32_t tests_count = 200;
 
     std::default_random_engine generator(time(nullptr));
     std::uniform_int_distribution<uint32_t> size_distribution(1, max_size);
     std::uniform_int_distribution<uint32_t> block_size_distribution(20, 100);
     std::uniform_int_distribution<int32_t> elements_distribution(-1000000, 1000000);
 
-    for (uint32_t i = 0; i < tests_count; ++i)
+    for (uint32_t i = 0; i < TESTS_COUNT; ++i)
     {
         uint32_t cur_size = size_distribution(generator);
         uint32_t cur_block_size = block_size_distribution(generator);
