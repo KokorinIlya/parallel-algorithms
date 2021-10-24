@@ -73,17 +73,16 @@ void sort_sequential(raw_array<T>& arr)
     do_sort_sequential(arr, 0, arr.get_size() - 1, generator);
 }
 
-template <typename T>
-void copy_parallel(raw_array<T> const& src, raw_array<T>& dst, uint32_t start_idx, uint32_t seq_block_size)
+template <typename T, template <typename> typename C>
+void copy_parallel(C<T> const& src, C<T>& dst, uint32_t start_idx, uint32_t seq_block_size, uint32_t src_size)
 {
-    assert(src.get_size() + start_idx <= dst.get_size());
-    if (src.get_size() == 0)
+    if (src_size == 0)
     {
         return;
     }
 
-    uint32_t blocks_count = src.get_size() / seq_block_size;
-    if (src.get_size() % seq_block_size != 0)
+    uint32_t blocks_count = src_size / seq_block_size;
+    if (src_size % seq_block_size != 0)
     {
         ++blocks_count;
     }
@@ -93,15 +92,29 @@ void copy_parallel(raw_array<T> const& src, raw_array<T>& dst, uint32_t start_id
     {
         uint32_t left = i * seq_block_size;
         uint32_t right = left + seq_block_size;
-        if (right > src.get_size())
+        if (right > src_size)
         {
-            right = src.get_size();
+            right = src_size;
         }
         for (uint32_t j = left; j < right; ++j)
         {
             dst[start_idx + j] = src[j];
         }
     }
+}
+
+template <typename T>
+std::vector<T> filter_sequential(raw_array<T> const& vals, std::function<bool(T const&)> pred)
+{
+    std::vector<T> res;
+    for (uint32_t i = 0; i < vals.get_size(); ++i)
+    {
+        if (prev(vals[i]))
+        {
+            res.append(vals[i]);
+        }
+    }
+    return res;
 }
 
 template <typename T>
@@ -139,9 +152,13 @@ void do_sort_parallel(raw_array<T>& arr, uint32_t seq_block_size, std::default_r
                do_sort_parallel(gt, seq_block_size, generator);
     cilk_sync;
 
-    cilk_spawn copy_parallel(le, arr, 0,                             seq_block_size);
-    cilk_spawn copy_parallel(eq, arr, le.get_size(),                 seq_block_size);
-               copy_parallel(gt, arr, le.get_size() + eq.get_size(), seq_block_size);
+    assert(le.get_size()                                 <= arr.get_size());
+    assert(eq.get_size() + le.get_size()                 <= arr.get_size());
+    assert(gt.get_size() + le.get_size() + eq.get_size() <= arr.get_size());
+
+    cilk_spawn copy_parallel(le, arr, 0,                             seq_block_size, le.get_size());
+    cilk_spawn copy_parallel(eq, arr, le.get_size(),                 seq_block_size, eq.get_size());
+               copy_parallel(gt, arr, le.get_size() + eq.get_size(), seq_block_size, gt.get_size());
     cilk_sync;
 }
 

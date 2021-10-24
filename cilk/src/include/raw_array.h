@@ -9,72 +9,72 @@ template <typename T>
 struct raw_array
 {
 public:
-    raw_array(uint32_t _size) : size(_size),
-                                ptr(nullptr) 
+    raw_array(uint32_t array_size) : _size(array_size),
+                                     _ptr(nullptr) 
     {
         static_assert(std::is_trivially_destructible<T>::value, "Type parameter should be trivially destructible");
-        if (size > 0)
+        if (_size > 0)
         {
-            ptr = static_cast<T*>(::operator new(sizeof(T) * _size));
+            _ptr = static_cast<T*>(::operator new(sizeof(T) * _size));
         }
     }
 
-    raw_array(raw_array<T> const& other) : size(other.size),
-                                           ptr(nullptr) 
+    raw_array(raw_array<T> const& other) : _size(other._size),
+                                           _ptr(nullptr) 
     {
-        if (size > 0)
+        if (_size > 0)
         {
-            ptr = static_cast<T*>(::operator new(sizeof(T) * other.size));
-            for (uint32_t i = 0; i < other.size; ++i)
+            _ptr = static_cast<T*>(::operator new(sizeof(T) * other._size));
+            for (uint32_t i = 0; i < other._size; ++i)
             {
-                *(ptr + i) = other[i];
+                *(_ptr + i) = other[i];
             }
         }
     }
 
     raw_array(raw_array<T>&& other) noexcept : 
-        size(other.size),
-        ptr(other.ptr) 
+        _size(other._size),
+        _ptr(other._ptr) 
     {
-        other.ptr = nullptr;
-        other.size = 0;
+        other._ptr = nullptr;
+        other._size = 0;
     }
 
     T* get_raw_ptr()
     {
-        return ptr;
+        return _ptr;
     }
 
     T const* get_raw_ptr() const
     {
-        return ptr;
+        return _ptr;
     }
 
     T const& operator[](uint32_t idx) const 
     {
-        return *(ptr + idx);
+        return *(_ptr + idx);
     }
 
     T& operator[](uint32_t idx) 
     {
-        return *(ptr + idx);
+        return *(_ptr + idx);
     }
 
     uint32_t get_size() const
     {
-        return size;
+        return _size;
     }
 
     ~raw_array()
     {
-        if (ptr != nullptr)
+        if (_ptr != nullptr)
         {
-            ::operator delete(ptr);
+            ::operator delete(_ptr);
         }
     }
 private:
-    uint32_t size;
-    T* ptr;
+    uint32_t _size;
+    T*       _ptr;
 };
 
 #endif

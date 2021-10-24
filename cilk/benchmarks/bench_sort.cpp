@@ -41,7 +41,7 @@ int main()
     uint64_t res = measure(generator, elements_distribution, sz, 0, reps);
     std::cout << "Sequential, elapsed " << res << " milliseconds" << std::endl;
 
-    std::vector<uint32_t> block_sizes({100, 1000, 10000, 100000});
+    std::vector<uint32_t> block_sizes({100, 1000, 10000, 100000, 1000000, 3000000});
     for (uint32_t seq_block_size : block_sizes)
     {
         uint64_t res = measure(generator, elements_distribution, sz, seq_block_size, reps);
