@@ -7,23 +7,17 @@
 #include <algorithm>
 #include <functional>
 
-void test_simple(bool parallel)
+template <template <typename, typename ...> typename C>
+void test_simple(std::function<void(C<int32_t>&)> sorter)
 {
     std::vector<int32_t> v({1, 3, 3, 7, -2, 5, 2, 4, 6, -8});
-    raw_array<int32_t> arr(v.size());
+    C<int32_t> arr(v.size());
     for (uint32_t i = 0; i < v.size(); ++i)
     {
         arr[i] = v[i];
     }
 
-    if (parallel)
-    {
-        sort_parallel<int32_t>(arr, 3);
-    }
-    else
-    {
-        sort_sequential<int32_t>(arr);
-    }
+    sorter(arr);
     
     std::vector<int32_t> exp_res({-8, -2, 1, 2, 3, 3, 4, 5, 6, 7});
     for (uint32_t i = 0; i < exp_res.size(); ++i)
@@ -34,20 +28,32 @@ void test_simple(bool parallel)
 
 TEST(parallel_sort, simple)
 {
-    test_simple(true);
+    test_simple<raw_array>(
+        [](raw_array<int32_t>& arr)
+        {
+            sort_parallel(arr, 3);
+        }
+    );
 }
 
 TEST(parallel_sort_filter_seq, simple)
 {
-    std::vector<int32_t> arr({1, 3, 3, 7, -2, 5, 2, 4, 6, -8});
-    sort_parallel_filter_seq<int32_t>(arr, 3);    
-    std::vector<int32_t> exp_res({-8, -2, 1, 2, 3, 3, 4, 5, 6, 7});
-    ASSERT_EQ(exp_res, arr);
+    test_simple<std::vector>(
+        [](std::vector<int32_t>& arr)
+        {
+            sort_parallel_filter_seq(arr, 3);
+        }
+    );
 }
 
 TEST(sequential_sort, simple)
 {
-    test_simple(false);
+    test_simple<raw_array>(
+        [](raw_array<int32_t>& arr)
+        {
+            sort_sequential(arr);
+        }
+    );
 }
 
 void test_sort(bool parallel)
