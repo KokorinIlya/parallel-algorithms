@@ -4,27 +4,24 @@
 #include <random>
 #include <iostream>
 #include <vector>
+#include <functional>
 
-uint64_t measure(std::default_random_engine& generator, std::uniform_int_distribution<int32_t>& elements_distribution,
-                uint32_t sz, uint32_t seq_block_size, uint32_t reps)
+template <template <typename, typename ...> typename C>
+uint64_t measure(
+    std::default_random_engine& generator, std::uniform_int_distribution<int32_t>& elements_distribution,
+    uint32_t sz, uint32_t reps, std::function<void(C<int32_t>&)> sorter)
 {
     uint64_t sum = 0;
     for (uint32_t i = 0; i < reps; ++i)
     {
-        raw_array<int32_t> x(sz);
+        C<int32_t> arr(sz);
         for (uint32_t j = 0; j < sz; ++j)
         {
-            x[j] = elements_distribution(generator);
+            arr[j] = elements_distribution(generator);
         }
+
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-        if (seq_block_size == 0)
-        {
-           sort_sequential(x);
-        }
-        else
-        {
-            sort_parallel(x, seq_block_size);
-        }
+        sorter(arr);
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         sum += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
     }
@@ -38,14 +35,38 @@ int main()
     uint32_t sz = 10000000;
     uint32_t reps = 10;
 
-    uint64_t res = measure(generator, elements_distribution, sz, 0, reps);
+    uint64_t res = measure<raw_array>(
+        generator, elements_distribution, sz, reps,
+        [](raw_array<int32_t>& arr)
+        {
+            sort_sequential(arr);
+        }
+    );
     std::cout << "Sequential, elapsed " << res << " milliseconds" << std::endl;
 
     std::vector<uint32_t> block_sizes({100, 1000, 10000, 100000, 1000000, 3000000});
+
     for (uint32_t seq_block_size : block_sizes)
     {
-        uint64_t res = measure(generator, elements_distribution, sz, seq_block_size, reps);
-        std::cout << seq_block_size << " seq block size, elapsed " << res << " milliseconds" << std::endl;
+        uint64_t res = measure<raw_array>(
+            generator, elements_distribution, sz, reps,
+            [seq_block_size](raw_array<int32_t>& arr)
+            {
+                sort_parallel(arr, seq_block_size);
+            }
+        );
+        std::cout << "Parallel: " << seq_block_size << 
+            " seq block size, elapsed " << res << " milliseconds" << std::endl;
+
+        res = measure<std::vector>(
+            generator, elements_distribution, sz, reps,
+            [seq_block_size](std::vector<int32_t>& arr)
+            {
+                sort_parallel_filter_seq(arr, seq_block_size);
+            }
+        );
+        std::cout << "Parallel + seq filter: " << seq_block_size << 
+            " seq block size, elapsed " << res << " milliseconds" << std::endl;
     }
     return 0;
 }
