@@ -60,7 +60,7 @@ public:
         return *(_ptr + idx);
     }
 
-    uint32_t get_size() const
+    uint32_t size() const
     {
         return _size;
     }

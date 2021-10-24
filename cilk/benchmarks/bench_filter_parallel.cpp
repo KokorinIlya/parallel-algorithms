@@ -10,7 +10,7 @@ template <typename T>
 std::vector<T> filter_sequential(raw_array<T> const& vals, std::function<bool(T const&)> pred)
 {
     std::vector<T> res;
-    for (uint32_t i = 0; i < vals.get_size(); ++i)
+    for (uint32_t i = 0; i < vals.size(); ++i)
     {
         if (pred(vals[i]))
         {
@@ -32,7 +32,7 @@ uint64_t measure(std::default_random_engine& generator, std::uniform_int_distrib
     for (uint32_t i = 0; i < reps; ++i)
     {
         raw_array<int32_t> arr(sz);
-        for (uint32_t j = 0; j < arr.get_size(); ++j)
+        for (uint32_t j = 0; j < arr.size(); ++j)
         {
             arr[j] = elements_distribution(generator);
         }

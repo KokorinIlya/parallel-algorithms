@@ -16,7 +16,7 @@ TEST(sequential_scan, simple)
     auto [psums, total_sum] = scan_exclusive_sequential(x);
     std::vector<int32_t> exp_res({0, 1, 4, 7, 14, 12});
     ASSERT_EQ(17, total_sum);
-    ASSERT_EQ(exp_res.size(), psums.get_size());
+    ASSERT_EQ(exp_res.size(), psums.size());
     for (uint32_t i = 0; i < exp_res.size(); ++i)
     {
         ASSERT_EQ(exp_res[i], psums[i]);
@@ -34,7 +34,7 @@ TEST(blocked_scan, simple)
     auto [psums, total_sum] = scan_exclusive_blocked(x, 3);
     std::vector<int32_t> exp_res({0, 1, 4, 7, 14, 12, 17, 19, 23, 29});
     ASSERT_EQ(21, total_sum);
-    ASSERT_EQ(exp_res.size(), psums.get_size());
+    ASSERT_EQ(exp_res.size(), psums.size());
     for (uint32_t i = 0; i < exp_res.size(); ++i)
     {
         ASSERT_EQ(exp_res[i], psums[i]);
@@ -47,7 +47,7 @@ TEST(blocked_scan, empty_array)
     auto [psums, total_sum] = scan_exclusive_blocked(x, 3);
     ASSERT_EQ(0, total_sum);
     ASSERT_EQ(nullptr, psums.get_raw_ptr());
-    ASSERT_EQ(0, psums.get_size());
+    ASSERT_EQ(0, psums.size());
 }
 
 TEST(blocked_scan, stress) 
@@ -73,8 +73,8 @@ TEST(blocked_scan, stress)
 
         auto [psums_expected, total_sum_expected] = scan_exclusive_sequential(x);
         auto [psums, total_sum] = scan_exclusive_blocked(x, cur_blocks);
-        ASSERT_EQ(psums_expected.get_size(), psums.get_size());
-        ASSERT_EQ(cur_size, psums.get_size());
+        ASSERT_EQ(psums_expected.size(), psums.size());
+        ASSERT_EQ(cur_size, psums.size());
         for (uint32_t j = 0; j < cur_size; ++j)
         {
             ASSERT_EQ(psums_expected[j], psums[j]);

@@ -12,13 +12,13 @@ int32_t inc(int32_t const& x)
 TEST(parallel_map, simple)
 {
     raw_array<int32_t> arr(1000);
-    for (uint32_t i = 0; i < arr.get_size(); ++i)
+    for (uint32_t i = 0; i < arr.size(); ++i)
     {
         arr[i] = i;
     }
     raw_array<int32_t> res = map_parallel<int32_t, int32_t>(arr, &inc, 10);
-    ASSERT_EQ(arr.get_size(), res.get_size());
-    for (uint32_t i = 0; i < res.get_size(); ++i)
+    ASSERT_EQ(arr.size(), res.size());
+    for (uint32_t i = 0; i < res.size(); ++i)
     {
         ASSERT_EQ(res[i], inc(arr[i]));
     }
@@ -29,7 +29,7 @@ TEST(parallel_map, empty_array)
     raw_array<int32_t> arr(0);
     raw_array<int32_t> res = map_parallel<int32_t, int32_t>(arr, &inc, 10);
     ASSERT_EQ(nullptr, res.get_raw_ptr());
-    ASSERT_EQ(0, res.get_size());
+    ASSERT_EQ(0, res.size());
 }
 
 TEST(parallel_map, stress) 
@@ -53,8 +53,8 @@ TEST(parallel_map, stress)
             arr[j] = elements_distribution(generator);
         }
         raw_array<int32_t> res = map_parallel<int32_t, int32_t>(arr, &inc, cur_blocks);
-        ASSERT_EQ(arr.get_size(), res.get_size());
-        for (uint32_t j = 0; j < res.get_size(); ++j)
+        ASSERT_EQ(arr.size(), res.size());
+        for (uint32_t j = 0; j < res.size(); ++j)
         {
             ASSERT_EQ(res[j], inc(arr[j]));
         }

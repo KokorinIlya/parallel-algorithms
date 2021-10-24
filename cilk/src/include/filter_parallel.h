@@ -14,13 +14,13 @@ template <typename T>
 raw_array<T> filter_parallel(raw_array<T> const& vals, std::function<bool(T const&)> pred, uint32_t blocks_count)
 {
     assert(blocks_count > 0);
-    if (vals.get_size() == 0)
+    if (vals.size() == 0)
     {
         return raw_array<T>(0);
     }
 
-    uint32_t elements_per_block = vals.get_size() / blocks_count;
-    if (vals.get_size() % blocks_count != 0)
+    uint32_t elements_per_block = vals.size() / blocks_count;
+    if (vals.size() % blocks_count != 0)
     {
         ++elements_per_block;
     }
@@ -40,10 +40,10 @@ raw_array<T> filter_parallel(raw_array<T> const& vals, std::function<bool(T cons
         },
         blocks_count
     );
-    assert(flags.get_size() == vals.get_size());
+    assert(flags.size() == vals.size());
 
     auto [idxs, total_elems] = scan_exclusive_blocked(flags, blocks_count);
-    assert(idxs.get_size() == vals.get_size());
+    assert(idxs.size() == vals.size());
     
     raw_array<T> res(total_elems);
 
@@ -52,9 +52,9 @@ raw_array<T> filter_parallel(raw_array<T> const& vals, std::function<bool(T cons
     {
         uint32_t left = i * elements_per_block;
         uint32_t right = left + elements_per_block;
-        if (right > vals.get_size())
+        if (right > vals.size())
         {
-            right = vals.get_size();
+            right = vals.size();
         }
         for (uint32_t j = left; j < right; ++j)
         {

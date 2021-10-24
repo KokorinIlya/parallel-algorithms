@@ -11,8 +11,8 @@ int32_t inc(int32_t const& x)
 
 raw_array<int32_t> map_sequential(raw_array<int32_t> const& from, std::function<int32_t(int32_t const&)> mapper)
 {
-    raw_array<int32_t> result(from.get_size());
-    for (uint32_t i = 0; i < from.get_size(); ++i)
+    raw_array<int32_t> result(from.size());
+    for (uint32_t i = 0; i < from.size(); ++i)
     {
         result[i] = mapper(from[i]);
     }
@@ -26,7 +26,7 @@ uint64_t measure(std::default_random_engine& generator, std::uniform_int_distrib
     for (uint32_t i = 0; i < reps; ++i)
     {
         raw_array<int32_t> arr(sz);
-        for (uint32_t j = 0; j < arr.get_size(); ++j)
+        for (uint32_t j = 0; j < arr.size(); ++j)
         {
             arr[j] = elements_distribution(generator);
         }

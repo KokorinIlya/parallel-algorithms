@@ -17,10 +17,10 @@
 #include <vector>
 #include <random>
 
-template <typename T>
-uint32_t partition(raw_array<T>& arr, uint32_t left, uint32_t right, std::default_random_engine& generator)
+template <typename T, template <typename, typename ...> typename C>
+uint32_t partition(C<T>& arr, uint32_t left, uint32_t right, std::default_random_engine& generator)
 {
-    assert(0 <= left && left < right && right < arr.get_size());
+    assert(0 <= left && left < right && right < arr.size());
     std::uniform_int_distribution<uint32_t> p_idx_distribution(left, right);
     uint32_t partitioner_idx = p_idx_distribution(generator);
     assert(left <= partitioner_idx && partitioner_idx <= right);
@@ -49,40 +49,41 @@ uint32_t partition(raw_array<T>& arr, uint32_t left, uint32_t right, std::defaul
     return j;
 }
 
-template <typename T>
-void do_sort_sequential(raw_array<T>& arr, uint32_t left, uint32_t right, std::default_random_engine& generator)
+template <typename T, template <typename, typename ...> typename C>
+void do_sort_sequential(C<T>& arr, uint32_t left, uint32_t right, std::default_random_engine& generator)
 {
     if (left >= right)
     {
         return;
     }
-    assert(0 <= left && left < right && right < arr.get_size());
+    assert(0 <= left && left < right && right < arr.size());
     uint32_t p_idx = partition(arr, left, right, generator);
     do_sort_sequential(arr, left,      p_idx, generator);
     do_sort_sequential(arr, p_idx + 1, right, generator);
 }
 
-template <typename T>
-void sort_sequential(raw_array<T>& arr)
+template <typename T, template <typename, typename ...> typename C>
+void sort_sequential(C<T>& arr)
 {
-    if (arr.get_size() <= 1)
+    if (arr.size() <= 1)
     {
         return;
     }
     std::default_random_engine generator(time(nullptr));
-    do_sort_sequential(arr, 0, arr.get_size() - 1, generator);
+    do_sort_sequential(arr, 0, arr.size() - 1, generator);
 }
 
-template <typename T, template <typename> typename C>
-void copy_parallel(C<T> const& src, C<T>& dst, uint32_t start_idx, uint32_t seq_block_size, uint32_t src_size)
+template <typename T, template <typename, typename ...> typename C>
+void copy_parallel(C<T> const& src, C<T>& dst, uint32_t start_idx, uint32_t seq_block_size)
 {
-    if (src_size == 0)
+    assert(src.size() + start_idx <= dst.size());
+    if (src.size() == 0)
     {
         return;
     }
 
-    uint32_t blocks_count = src_size / seq_block_size;
-    if (src_size % seq_block_size != 0)
+    uint32_t blocks_count = src.size() / seq_block_size;
+    if (src.size() % seq_block_size != 0)
     {
         ++blocks_count;
     }
@@ -92,9 +93,9 @@ void copy_parallel(C<T> const& src, C<T>& dst, uint32_t start_idx, uint32_t seq_
     {
         uint32_t left = i * seq_block_size;
         uint32_t right = left + seq_block_size;
-        if (right > src_size)
+        if (right > src.size())
         {
-            right = src_size;
+            right = src.size();
         }
         for (uint32_t j = left; j < right; ++j)
         {
@@ -104,38 +105,24 @@ void copy_parallel(C<T> const& src, C<T>& dst, uint32_t start_idx, uint32_t seq_
 }
 
 template <typename T>
-std::vector<T> filter_sequential(raw_array<T> const& vals, std::function<bool(T const&)> pred)
-{
-    std::vector<T> res;
-    for (uint32_t i = 0; i < vals.get_size(); ++i)
-    {
-        if (prev(vals[i]))
-        {
-            res.append(vals[i]);
-        }
-    }
-    return res;
-}
-
-template <typename T>
 void do_sort_parallel(raw_array<T>& arr, uint32_t seq_block_size, std::default_random_engine& generator)
 {
-    if (arr.get_size() <= 1)
+    if (arr.size() <= 1)
     {
         return;
     }
-    if (arr.get_size() <= seq_block_size)
+    if (arr.size() <= seq_block_size)
     {
-        do_sort_sequential(arr, 0, arr.get_size() - 1, generator);
+        do_sort_sequential(arr, 0, arr.size() - 1, generator);
         return;
     }
 
-    std::uniform_int_distribution<uint32_t> p_idx_distribution(0, arr.get_size() - 1);
+    std::uniform_int_distribution<uint32_t> p_idx_distribution(0, arr.size() - 1);
     uint32_t partitioner_idx = p_idx_distribution(generator);
-    assert(0 <= partitioner_idx && partitioner_idx < arr.get_size());
+    assert(0 <= partitioner_idx && partitioner_idx < arr.size());
     T const& partitioner = arr[partitioner_idx];
 
-    uint32_t blocks_count = arr.get_size() / seq_block_size;
+    uint32_t blocks_count = arr.size() / seq_block_size;
 
     raw_array<T> le = cilk_spawn filter_parallel<T>(
         arr, [&partitioner](T const& x) { return x <  partitioner; }, blocks_count
@@ -152,13 +139,9 @@ void do_sort_parallel(raw_array<T>& arr, uint32_t seq_block_size, std::default_r
                do_sort_parallel(gt, seq_block_size, generator);
     cilk_sync;
 
-    assert(le.get_size()                                 <= arr.get_size());
-    assert(eq.get_size() + le.get_size()                 <= arr.get_size());
-    assert(gt.get_size() + le.get_size() + eq.get_size() <= arr.get_size());
-
-    cilk_spawn copy_parallel(le, arr, 0,                             seq_block_size, le.get_size());
-    cilk_spawn copy_parallel(eq, arr, le.get_size(),                 seq_block_size, eq.get_size());
-               copy_parallel(gt, arr, le.get_size() + eq.get_size(), seq_block_size, gt.get_size());
+    cilk_spawn copy_parallel(le, arr, 0,                     seq_block_size);
+    cilk_spawn copy_parallel(eq, arr, le.size(),             seq_block_size);
+               copy_parallel(gt, arr, le.size() + eq.size(), seq_block_size);
     cilk_sync;
 }
 
@@ -168,6 +151,67 @@ void sort_parallel(raw_array<T>& arr, uint32_t seq_block_size)
 {
     std::default_random_engine generator(time(nullptr));
     do_sort_parallel(arr, seq_block_size, generator);
+}
+
+template <typename T>
+std::vector<T> filter_sequential(std::vector<T> const& vals, std::function<bool(T const&)> pred)
+{
+    std::vector<T> res;
+    for (uint32_t i = 0; i < vals.size(); ++i)
+    {
+        if (pred(vals[i]))
+        {
+            res.push_back(vals[i]);
+        }
+    }
+    return res;
+}
+
+template <typename T>
+void do_sort_parallel_filter_seq(std::vector<T>& arr, uint32_t seq_block_size, std::default_random_engine& generator)
+{
+    if (arr.size() <= 1)
+    {
+        return;
+    }
+    if (arr.size() <= seq_block_size)
+    {
+        do_sort_sequential<T, std::vector>(arr, 0, arr.size() - 1, generator);
+        return;
+    }
+
+    std::uniform_int_distribution<uint32_t> p_idx_distribution(0, arr.size() - 1);
+    uint32_t partitioner_idx = p_idx_distribution(generator);
+    assert(0 <= partitioner_idx && partitioner_idx < arr.size());
+    T const& partitioner = arr[partitioner_idx];
+
+    std::vector<T> le = cilk_spawn filter_sequential<T>(
+        arr, [&partitioner](T const& x) { return x <  partitioner; }
+    );
+    std::vector<T> eq = cilk_spawn filter_sequential<T>(
+        arr, [&partitioner](T const& x) { return x == partitioner; }
+    );
+    std::vector<T> gt =            filter_sequential<T>(
+        arr, [&partitioner](T const& x) { return x >  partitioner; }
+    );
+    cilk_sync;
+
+    cilk_spawn do_sort_parallel_filter_seq(le, seq_block_size, generator);
+               do_sort_parallel_filter_seq(gt, seq_block_size, generator);
+    cilk_sync;
+
+    cilk_spawn copy_parallel(le, arr, 0,                     seq_block_size);
+    cilk_spawn copy_parallel(eq, arr, le.size(),             seq_block_size);
+               copy_parallel(gt, arr, le.size() + eq.size(), seq_block_size);
+    cilk_sync;
+}
+
+
+template <typename T>
+void sort_parallel_filter_seq(std::vector<T>& arr, uint32_t seq_block_size)
+{
+    std::default_random_engine generator(time(nullptr));
+    do_sort_parallel_filter_seq(arr, seq_block_size, generator);
 }
 
 #endif

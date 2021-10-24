@@ -5,6 +5,7 @@
 #include <random>
 #include <vector>
 #include <algorithm>
+#include <functional>
 
 void test_simple(bool parallel)
 {
@@ -34,6 +35,14 @@ void test_simple(bool parallel)
 TEST(parallel_sort, simple)
 {
     test_simple(true);
+}
+
+TEST(parallel_sort_filter_seq, simple)
+{
+    std::vector<int32_t> arr({1, 3, 3, 7, -2, 5, 2, 4, 6, -8});
+    sort_parallel_filter_seq<int32_t>(arr, 3);    
+    std::vector<int32_t> exp_res({-8, -2, 1, 2, 3, 3, 4, 5, 6, 7});
+    ASSERT_EQ(exp_res, arr);
 }
 
 TEST(sequential_sort, simple)

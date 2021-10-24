@@ -7,7 +7,7 @@ include_directories(./include)
 
 include_directories(./src/include)
 
-add_compile_options(-fcilkplus)
+add_compile_options(-fcilkplus -std=c++17)
 
 add_executable(bench_scan.out src/scan.cpp benchmarks/bench_scan.cpp)
 target_link_libraries(bench_scan.out pthread cilkrts)
