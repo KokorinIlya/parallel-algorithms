@@ -36,12 +36,22 @@ TEST(sort, parallel_simple)
     );
 }
 
-TEST(sort, parall_filter_seq_simple)
+TEST(sort, parallel_filter_seq_simple)
 {
     test_simple<std::vector>(
         [](std::vector<int32_t>& arr)
         {
             sort_parallel_filter_seq(arr, 3);
+        }
+    );
+}
+
+TEST(sort, parallel_no_filters)
+{
+    test_simple<raw_array>(
+        [](raw_array<int32_t>& arr)
+        {
+            sort_parallel_no_filters(arr, 3);
         }
     );
 }
@@ -79,7 +89,7 @@ void test_stress(std::function<void(C<int32_t>&)> sorter, std::default_random_en
 
         sorter(arr);
         std::sort(v.begin(), v.end());
-        
+
         for (uint32_t j = 0; j < cur_size; ++j)
         {
             ASSERT_EQ(arr[j], v[j]);
@@ -110,6 +120,20 @@ TEST(sort, stress_parallel_filter_seq)
         {
             uint32_t cur_block_size = block_size_distribution(generator);
             sort_parallel_filter_seq(arr, cur_block_size);
+        },
+        generator
+    );
+}
+
+TEST(sort, stress_parallel_no_filters) 
+{
+    std::default_random_engine generator(time(nullptr));
+    std::uniform_int_distribution<uint32_t> block_size_distribution(20, 100);
+    test_stress<std::vector>(
+        [&generator, &block_size_distribution](std::vector<int32_t>& arr)
+        {
+            uint32_t cur_block_size = block_size_distribution(generator);
+            sort_parallel_no_filters(arr, cur_block_size);
         },
         generator
     );

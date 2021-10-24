@@ -17,6 +17,10 @@
 #include <vector>
 #include <random>
 
+/*
+Sequential sort
+*/
+
 template <typename T, template <typename, typename ...> typename C>
 uint32_t partition(C<T>& arr, uint32_t left, uint32_t right, std::default_random_engine& generator)
 {
@@ -72,6 +76,50 @@ void sort_sequential(C<T>& arr)
     std::default_random_engine generator(time(nullptr));
     do_sort_sequential(arr, 0, arr.size() - 1, generator);
 }
+
+/*
+Parallel sort without filtering
+*/
+
+template <typename T, template <typename, typename ...> typename C>
+void sort_parallel_no_filters(
+    C<T>& arr, uint32_t left, uint32_t right, uint32_t seq_block_size,
+    std::default_random_engine& generator)
+{
+    if (left >= right)
+    {
+        return;
+    }
+    assert(0 <= left && left < right && right < arr.size());
+    uint32_t p_idx = partition(arr, left, right, generator);
+
+    if (right - left + 1 <= seq_block_size)
+    {
+        sort_parallel_no_filters(arr, left,      p_idx, seq_block_size, generator);
+        sort_parallel_no_filters(arr, p_idx + 1, right, seq_block_size, generator);
+    }
+    else
+    {
+        cilk_spawn sort_parallel_no_filters(arr, left,      p_idx, seq_block_size, generator);
+                   sort_parallel_no_filters(arr, p_idx + 1, right, seq_block_size, generator);
+        cilk_sync;
+    }
+}
+
+template <typename T, template <typename, typename ...> typename C>
+void sort_parallel_no_filters(C<T>& arr, uint32_t seq_block_size)
+{
+    if (arr.size() <= 1)
+    {
+        return;
+    }
+    std::default_random_engine generator(time(nullptr));
+    sort_parallel_no_filters(arr, 0, arr.size() - 1, seq_block_size, generator);
+}
+
+/*
+Parallel sort with parallel filters
+*/
 
 template <typename T, template <typename, typename ...> typename C>
 void copy_parallel(C<T> const& src, C<T>& dst, uint32_t start_idx, uint32_t seq_block_size)
@@ -153,6 +201,10 @@ void sort_parallel(raw_array<T>& arr, uint32_t seq_block_size)
     do_sort_parallel(arr, seq_block_size, generator);
 }
 
+/*
+Parallel sort with sequential filters
+*/
+
 template <typename T>
 std::vector<T> filter_sequential(std::vector<T> const& vals, std::function<bool(T const&)> pred)
 {
@@ -205,7 +257,6 @@ void do_sort_parallel_filter_seq(std::vector<T>& arr, uint32_t seq_block_size, s
                copy_parallel(gt, arr, le.size() + eq.size(), seq_block_size);
     cilk_sync;
 }
-
 
 template <typename T>
 void sort_parallel_filter_seq(std::vector<T>& arr, uint32_t seq_block_size)

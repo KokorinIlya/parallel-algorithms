@@ -65,7 +65,17 @@ int main()
                 sort_parallel_filter_seq(arr, seq_block_size);
             }
         );
-        std::cout << "Parallel + seq filter: " << seq_block_size << 
+        std::cout << "Parallel, seq filter: " << seq_block_size << 
+            " seq block size, elapsed " << res << " milliseconds" << std::endl;
+
+        res = measure<std::vector>(
+            generator, elements_distribution, sz, reps,
+            [seq_block_size](std::vector<int32_t>& arr)
+            {
+                sort_parallel_no_filters(arr, seq_block_size);
+            }
+        );
+        std::cout << "Parallel, no filters: " << seq_block_size << 
             " seq block size, elapsed " << res << " milliseconds" << std::endl;
     }
     return 0;
