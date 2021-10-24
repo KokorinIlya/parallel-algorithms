@@ -18,7 +18,7 @@ void test_simple(std::function<void(C<int32_t>&)> sorter)
     }
 
     sorter(arr);
-    
+
     std::vector<int32_t> exp_res({-8, -2, 1, 2, 3, 3, 4, 5, 6, 7});
     for (uint32_t i = 0; i < exp_res.size(); ++i)
     {
@@ -26,7 +26,7 @@ void test_simple(std::function<void(C<int32_t>&)> sorter)
     }
 }
 
-TEST(parallel_sort, simple)
+TEST(sort, parallel_simple)
 {
     test_simple<raw_array>(
         [](raw_array<int32_t>& arr)
@@ -36,7 +36,7 @@ TEST(parallel_sort, simple)
     );
 }
 
-TEST(parallel_sort_filter_seq, simple)
+TEST(sort, parall_filter_seq_simple)
 {
     test_simple<std::vector>(
         [](std::vector<int32_t>& arr)
@@ -46,7 +46,7 @@ TEST(parallel_sort_filter_seq, simple)
     );
 }
 
-TEST(sequential_sort, simple)
+TEST(sort, sequential_simple)
 {
     test_simple<raw_array>(
         [](raw_array<int32_t>& arr)
@@ -56,21 +56,19 @@ TEST(sequential_sort, simple)
     );
 }
 
-void test_sort(bool parallel)
+template <template <typename, typename ...> typename C>
+void test_stress(std::function<void(C<int32_t>&)> sorter, std::default_random_engine& generator)
 {
     uint32_t max_size = 100000;
 
-    std::default_random_engine generator(time(nullptr));
     std::uniform_int_distribution<uint32_t> size_distribution(1, max_size);
-    std::uniform_int_distribution<uint32_t> block_size_distribution(20, 100);
     std::uniform_int_distribution<int32_t> elements_distribution(-1000000, 1000000);
 
     for (uint32_t i = 0; i < TESTS_COUNT; ++i)
     {
         uint32_t cur_size = size_distribution(generator);
-        uint32_t cur_block_size = block_size_distribution(generator);
 
-        raw_array<int32_t> arr(cur_size);
+        C<int32_t> arr(cur_size);
         std::vector<int32_t> v(cur_size);
         for (uint32_t j = 0; j < cur_size; ++j)
         {
@@ -78,15 +76,10 @@ void test_sort(bool parallel)
             arr[j] = x;
             v[j] = x;
         }
-        if (parallel)
-        {
-            sort_parallel<int32_t>(arr, cur_block_size);
-        }
-        else
-        {
-            sort_sequential<int32_t>(arr);
-        }
+
+        sorter(arr);
         std::sort(v.begin(), v.end());
+        
         for (uint32_t j = 0; j < cur_size; ++j)
         {
             ASSERT_EQ(arr[j], v[j]);
@@ -94,12 +87,42 @@ void test_sort(bool parallel)
     }
 }
 
-TEST(parallel_sort, stress) 
+TEST(sort, stress_parallel) 
 {
-    test_sort(true);
+    std::default_random_engine generator(time(nullptr));
+    std::uniform_int_distribution<uint32_t> block_size_distribution(20, 100);
+    test_stress<raw_array>(
+        [&generator, &block_size_distribution](raw_array<int32_t>& arr)
+        {
+            uint32_t cur_block_size = block_size_distribution(generator);
+            sort_parallel(arr, cur_block_size);
+        },
+        generator
+    );
 }
 
-TEST(sequential_sort, stress) 
+TEST(sort, stress_parallel_filter_seq) 
 {
-    test_sort(false);
+    std::default_random_engine generator(time(nullptr));
+    std::uniform_int_distribution<uint32_t> block_size_distribution(20, 100);
+    test_stress<std::vector>(
+        [&generator, &block_size_distribution](std::vector<int32_t>& arr)
+        {
+            uint32_t cur_block_size = block_size_distribution(generator);
+            sort_parallel_filter_seq(arr, cur_block_size);
+        },
+        generator
+    );
+}
+
+TEST(sort, stress_sequential) 
+{
+    std::default_random_engine generator(time(nullptr));
+    test_stress<raw_array>(
+        [](raw_array<int32_t>& arr)
+        {
+            sort_sequential(arr);
+        },
+        generator
+    );
 }
