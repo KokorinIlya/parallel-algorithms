@@ -38,4 +38,4 @@
 
 ## Конфигурация запуска
 * `CILK_NWORKERS=N ./<bench_name>.out`
-* Пример: `CILK_NWORKERS=16 ./bench_prefix_sum.out`
+* Пример: `CILK_NWORKERS=16 ./bench_sort.out`
