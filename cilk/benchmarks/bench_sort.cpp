@@ -31,9 +31,9 @@ uint64_t measure(
 int main()
 {
     std::default_random_engine generator(time(nullptr));
-    std::uniform_int_distribution<int32_t> elements_distribution(-1000000, 1000000);
-    uint32_t sz = 10000000;
-    uint32_t reps = 10;
+    std::uniform_int_distribution<int32_t> elements_distribution(-100'000'000, 100'000'000);
+    uint32_t sz = 100'000'000;
+    uint32_t reps = 5;
 
     uint64_t res = measure<raw_array>(
         generator, elements_distribution, sz, reps,
@@ -44,7 +44,7 @@ int main()
     );
     std::cout << "Sequential, elapsed " << res << " milliseconds" << std::endl;
 
-    std::vector<uint32_t> block_sizes({100, 1000, 10000, 100000, 1000000, 3000000});
+    std::vector<uint32_t> block_sizes({10, 100, 1'000, 10'000, 100'000, 1'000'000, 10'000'000, 30'000'000});
 
     for (uint32_t seq_block_size : block_sizes)
     {
