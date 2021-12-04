@@ -28,6 +28,19 @@ uint64_t coords_to_index(std::array<uint64_t, DIM> const& coords, std::array<uin
     return result;
 }
 
+template <std::size_t DIM>
+uint64_t calc_nodes_count(std::array<uint64_t, DIM> const& dimensions)
+{
+    static_assert(DIM >= 1);
+
+    uint64_t result = 1;
+    for (std::size_t i = 0; i < DIM; ++i)
+    {
+        result *= dimensions[i];
+    }
+    return result;
+}
+
 void add_edge(std::unordered_map<uint64_t, std::vector<uint64_t>>& edges, uint64_t from_idx, uint64_t to_idx)
 {
     if (edges.find(from_idx) == edges.end())

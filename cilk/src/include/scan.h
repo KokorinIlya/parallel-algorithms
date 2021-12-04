@@ -1,5 +1,4 @@
-#ifndef SCAN_H
-#define SCAN_H
+#pragma once
 
 #include <cstdint>
 #include "raw_array.h"
@@ -8,5 +7,3 @@
 std::pair<raw_array<int32_t>, int32_t> scan_exclusive_blocked(raw_array<int32_t> const& x, uint32_t blocks_count);
 
 std::pair<raw_array<int32_t>, int32_t> scan_exclusive_sequential(raw_array<int32_t> const& x);
-
-#endif

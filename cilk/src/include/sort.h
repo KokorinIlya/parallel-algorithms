@@ -1,5 +1,4 @@
-#ifndef SORT_PARALLEL_H
-#define SORT_PARALLEL_H
+#pragma once
 
 #include "raw_array.h"
 #include "map_parallel.h"
@@ -264,5 +263,3 @@ void sort_parallel_filter_seq(std::vector<T>& arr, uint32_t seq_block_size)
     std::default_random_engine generator(time(nullptr));
     do_sort_parallel_filter_seq(arr, seq_block_size, generator);
 }
-
-#endif

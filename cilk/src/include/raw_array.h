@@ -1,5 +1,4 @@
-#ifndef RAW_ARRAY_H
-#define RAW_ARRAY_H
+#pragma once
 
 #include <cstdint>
 #include <new>
@@ -76,5 +75,3 @@ private:
     uint32_t _size;
     T*       _ptr;
 };
-
-#endif
