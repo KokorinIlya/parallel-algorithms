@@ -10,3 +10,6 @@ Makefile
 cmake_install.cmake
 cilk/compile.sh
 .vscode/
+chunkedseq/
+cmdline/
+pctl/
