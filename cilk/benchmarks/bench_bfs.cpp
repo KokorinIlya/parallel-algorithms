@@ -1,3 +1,5 @@
+#define NDEBUG
+
 #include "bfs.h"
 #include "graph_builder.h"
 #include "parray.hpp"
@@ -32,6 +34,7 @@ uint64_t measure(
 
 int main()
 {
+    assert(false);
     std::array<uint64_t, 3> dims = {100, 100, 100};
     uint32_t reps = 5;
 

@@ -55,6 +55,47 @@ inline std::vector<int64_t> bfs_sequential(
     return result;
 }
 
+inline void process_single_node(
+    std::unordered_map<uint64_t, std::vector<uint64_t>> const& edges,
+    pasl::pctl::parray<int64_t> const& cur_frontier,
+    pasl::pctl::parray<std::atomic<bool>>& taken,
+    pasl::pctl::parray<int64_t>& result,
+    pasl::pctl::parray<int64_t>& new_frontier,
+    pasl::pctl::parray<uint64_t> const& pref_sizes,
+    uint64_t node_idx)
+{
+    assert(cur_frontier[node_idx] >= 0);
+    uint64_t from_node = cur_frontier[node_idx];
+    assert(taken[from_node].load() && result[from_node] >= 0);
+    uint64_t start_idx = pref_sizes[node_idx];
+
+    auto it = edges.find(from_node);
+    if (it != edges.end())
+    {
+        std::vector<uint64_t> const& to_nodes = it->second;
+        pasl::pctl::parallel_for(
+            static_cast<uint64_t>(0), static_cast<uint64_t>(to_nodes.size()),
+            [&taken, &result, &new_frontier, &to_nodes, start_idx, from_node](uint64_t edge_idx)
+            {
+                uint64_t to_node = to_nodes[edge_idx];
+                bool expected_taken = false;
+                if (taken[to_node].compare_exchange_strong(expected_taken, true))
+                {
+                    assert(expected_taken == false);
+                    assert(result[to_node] == -1);
+                    result[to_node] = result[from_node] + 1;
+                    assert(new_frontier[start_idx + edge_idx] == -1);
+                    new_frontier[start_idx + edge_idx] = to_node;
+                }
+                else
+                {
+                    assert(expected_taken == true);
+                }
+            }
+        );
+    }
+}
+
 inline pasl::pctl::parray<int64_t> bfs_cas(
     uint64_t nodes_count, uint64_t start_node,
     std::unordered_map<uint64_t, std::vector<uint64_t>> const& edges)
@@ -113,39 +154,29 @@ inline pasl::pctl::parray<int64_t> bfs_cas(
         uint64_t new_frontier_size = pref_sizes[pref_sizes.size() - 1] + sizes[sizes.size() - 1];
         pasl::pctl::parray<int64_t> new_frontier(new_frontier_size, static_cast<int64_t>(-1));
 
-        pasl::pctl::parallel_for(
+        pasl::pctl::range::parallel_for(
             static_cast<uint64_t>(0), static_cast<uint64_t>(cur_frontier.size()),
+            [&pref_sizes, new_frontier_size](uint64_t left, uint64_t right)
+            {
+                assert(0 <= left && left < right && right <= pref_sizes.size());
+
+                uint64_t end_size = new_frontier_size;
+                if (right < pref_sizes.size())
+                {
+                    end_size = pref_sizes[right];
+                }
+                return end_size - pref_sizes[left];
+            },
             [&edges, &cur_frontier, &taken, &result, &new_frontier, &pref_sizes](uint64_t node_idx)
             {
-                assert(cur_frontier[node_idx] >= 0);
-                uint64_t from_node = cur_frontier[node_idx];
-                assert(taken[from_node].load() && result[from_node] >= 0);
-                uint64_t start_idx = pref_sizes[node_idx];
-
-                auto it = edges.find(from_node);
-                if (it != edges.end())
+                process_single_node(edges, cur_frontier, taken, result, new_frontier, pref_sizes, node_idx);
+            },
+            [&edges, &cur_frontier, &taken, &result, &new_frontier, &pref_sizes](uint64_t left, uint64_t right)
+            {
+                assert(0 <= left && left < right && right <= pref_sizes.size());
+                for (uint64_t i = left; i < right; ++i)
                 {
-                    std::vector<uint64_t> const& to_nodes = it->second;
-                    pasl::pctl::parallel_for(
-                        static_cast<uint64_t>(0), static_cast<uint64_t>(to_nodes.size()),
-                        [&taken, &result, &new_frontier, &to_nodes, start_idx, from_node](uint64_t edge_idx)
-                        {
-                            uint64_t to_node = to_nodes[edge_idx];
-                            bool expected_taken = false;
-                            if (taken[to_node].compare_exchange_strong(expected_taken, true))
-                            {
-                                assert(expected_taken == false);
-                                assert(result[to_node] == -1);
-                                result[to_node] = result[from_node] + 1;
-                                assert(new_frontier[start_idx + edge_idx] == -1);
-                                new_frontier[start_idx + edge_idx] = to_node;
-                            }
-                            else
-                            {
-                                assert(expected_taken == true);
-                            }
-                        }
-                    );
+                    process_single_node(edges, cur_frontier, taken, result, new_frontier, pref_sizes, i);
                 }
             }
         );
