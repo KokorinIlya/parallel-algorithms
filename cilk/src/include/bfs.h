@@ -8,6 +8,29 @@
 #include <atomic>
 #include <functional>
 
+enum struct NodeLoopType 
+{ 
+    NonRange, 
+    NonRangeCost, 
+    Range 
+};
+
+inline uint64_t get_node_size(
+    pasl::pctl::parray<int64_t> const& cur_frontier, 
+    pasl::pctl::parray<std::atomic<int64_t>> const& result,
+    std::vector<std::vector<uint64_t>> const& edges,
+    uint64_t node_idx)
+{
+    assert(cur_frontier[node_idx] >= 0);
+    uint64_t cur_node = static_cast<uint64_t>(cur_frontier[node_idx]);
+    assert(result[cur_node].load() >= 0);
+    return static_cast<uint64_t>(edges[cur_node].size());
+}
+
+/*
+Sequential BFS
+*/
+
 inline std::vector<int64_t> bfs_sequential(
     uint64_t nodes_count, uint64_t start_node,
     std::vector<std::vector<uint64_t>> const& edges)
@@ -43,7 +66,11 @@ inline std::vector<int64_t> bfs_sequential(
     return result;
 }
 
-inline void process_single_node(
+/*
+Parallel-CAS BFS
+*/
+
+inline void process_single_node_cas(
     std::vector<std::vector<uint64_t>> const& edges,
     pasl::pctl::parray<int64_t> const& cur_frontier,
     pasl::pctl::parray<std::atomic<int64_t>>& result,
@@ -80,7 +107,8 @@ inline void process_single_node(
 
 inline pasl::pctl::parray<int64_t> bfs_cas(
     uint64_t nodes_count, uint64_t start_node,
-    std::vector<std::vector<uint64_t>> const& edges)
+    std::vector<std::vector<uint64_t>> const& edges,
+    NodeLoopType loop_type)
 {
     assert(0 <= start_node && start_node < nodes_count);
     pasl::pctl::parray<std::atomic<int64_t>> result(
@@ -99,12 +127,9 @@ inline pasl::pctl::parray<int64_t> bfs_cas(
 
         pasl::pctl::parray<uint64_t> sizes(
             cur_frontier.size(),
-            [&cur_frontier, &edges, &result](uint64_t idx)
+            [&cur_frontier, &edges, &result](uint64_t node_idx)
             {
-                assert(cur_frontier[idx] >= 0);
-                uint64_t cur_node = static_cast<uint64_t>(cur_frontier[idx]);
-                assert(result[cur_node].load() >= 0);
-                return static_cast<uint64_t>(edges[cur_node].size());
+                return get_node_size(cur_frontier, result, edges, node_idx);
             }
         );
 
@@ -125,32 +150,58 @@ inline pasl::pctl::parray<int64_t> bfs_cas(
         uint64_t new_frontier_size = pref_sizes[pref_sizes.size() - 1] + sizes[sizes.size() - 1];
         pasl::pctl::parray<int64_t> new_frontier(new_frontier_size, static_cast<int64_t>(-1));
 
-        pasl::pctl::range::parallel_for( // TODO: use ordinary for
-            static_cast<uint64_t>(0), static_cast<uint64_t>(cur_frontier.size()),
-            [&pref_sizes, new_frontier_size](uint64_t left, uint64_t right)
-            {
-                assert(0 <= left && left < right && right <= pref_sizes.size());
-
-                uint64_t end_size = new_frontier_size;
-                if (right < pref_sizes.size())
-                {
-                    end_size = pref_sizes[right];
-                }
-                return end_size - pref_sizes[left];
-            },
-            [&edges, &cur_frontier, &result, &new_frontier, &pref_sizes](uint64_t node_idx)
-            {
-                process_single_node(edges, cur_frontier, result, new_frontier, pref_sizes, node_idx);
-            },
-            [&edges, &cur_frontier, &result, &new_frontier, &pref_sizes](uint64_t left, uint64_t right)
-            {
-                assert(0 <= left && left < right && right <= pref_sizes.size());
-                for (uint64_t i = left; i < right; ++i)
-                {
-                    process_single_node(edges, cur_frontier, result, new_frontier, pref_sizes, i);
-                }
-            }
-        );
+        switch(loop_type)
+        {
+            case NodeLoopType::NonRange: 
+                pasl::pctl::parallel_for(
+                    static_cast<uint64_t>(0), static_cast<uint64_t>(cur_frontier.size()),
+                    [&edges, &cur_frontier, &result, &new_frontier, &pref_sizes](uint64_t node_idx)
+                    {
+                        process_single_node_cas(edges, cur_frontier, result, new_frontier, pref_sizes, node_idx);
+                    }
+                );
+                break;
+            case NodeLoopType::NonRangeCost:
+                pasl::pctl::parallel_for(
+                    static_cast<uint64_t>(0), static_cast<uint64_t>(cur_frontier.size()),
+                    [&cur_frontier, &edges, &result](uint64_t node_idx)
+                    {
+                        return get_node_size(cur_frontier, result, edges, node_idx);
+                    },
+                    [&edges, &cur_frontier, &result, &new_frontier, &pref_sizes](uint64_t node_idx)
+                    {
+                        process_single_node_cas(edges, cur_frontier, result, new_frontier, pref_sizes, node_idx);
+                    }
+                );
+                break;
+            case NodeLoopType::Range:
+                pasl::pctl::range::parallel_for(
+                    static_cast<uint64_t>(0), static_cast<uint64_t>(cur_frontier.size()),
+                    [&pref_sizes, new_frontier_size](uint64_t left, uint64_t right)
+                    {
+                        assert(0 <= left && left < right && right <= pref_sizes.size());
+                        uint64_t end_size = new_frontier_size;
+                        if (right < pref_sizes.size())
+                        {
+                            end_size = pref_sizes[right];
+                        }
+                        return end_size - pref_sizes[left];
+                    },
+                    [&edges, &cur_frontier, &result, &new_frontier, &pref_sizes](uint64_t node_idx)
+                    {
+                        process_single_node_cas(edges, cur_frontier, result, new_frontier, pref_sizes, node_idx);
+                    },
+                    [&edges, &cur_frontier, &result, &new_frontier, &pref_sizes](uint64_t left, uint64_t right)
+                    {
+                        assert(0 <= left && left < right && right <= pref_sizes.size());
+                        for (uint64_t i = left; i < right; ++i)
+                        {
+                            process_single_node_cas(edges, cur_frontier, result, new_frontier, pref_sizes, i);
+                        }
+                    }
+                );
+                break;
+        }
 
         cur_frontier = pasl::pctl::filter(
             new_frontier.begin(), new_frontier.end(),

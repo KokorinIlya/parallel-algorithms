@@ -58,11 +58,9 @@ uint64_t get_dist(std::array<uint64_t, DIM> const& pt_a, std::array<uint64_t, DI
 }
 
 template <template <typename, typename ...> typename C, std::size_t DIM>
-void test_bfs_cubic(std::array<uint64_t, DIM> const& dimensions,
-                    std::function<C<int64_t>(
-                        uint64_t, uint64_t, 
-                        std::vector<std::vector<uint64_t>> const&
-                    )> const& bfs_fun)
+void test_bfs_cubic(
+    std::array<uint64_t, DIM> const& dimensions,
+    std::function<C<int64_t>(uint64_t, uint64_t, std::vector<std::vector<uint64_t>> const&)> const& bfs_fun)
 {
     auto edges = build_graph(dimensions);
     uint64_t nodes_count = calc_nodes_count(dimensions);
@@ -97,12 +95,36 @@ TEST(sequential_bfs, stress_three_dimensions)
 
 TEST(cas_bfs, stress_two_dimensions)
 {
-    std::array<uint64_t, 2> dims = {20, 40};
-    test_bfs_cubic<pasl::pctl::parray, 2>(dims, bfs_cas);
+    std::array<uint64_t, 2> dims = {10, 20};
+    std::vector<NodeLoopType> all_loop_types({
+        NodeLoopType::NonRange, NodeLoopType::NonRangeCost, NodeLoopType::Range
+    });
+    for (NodeLoopType cur_loop_type : all_loop_types)
+    {
+        test_bfs_cubic<pasl::pctl::parray, 2>(
+            dims, 
+            [cur_loop_type](uint64_t nodes_count, uint64_t start_node, std::vector<std::vector<uint64_t>> const& edges)
+            {
+                return bfs_cas(nodes_count, start_node, edges, cur_loop_type);
+            }
+        );
+    }
 }
 
 TEST(cas_bfs, stress_three_dimensions)
 {
-    std::array<uint64_t, 3> dims = {5, 10, 20};
-    test_bfs_cubic<pasl::pctl::parray, 3>(dims, bfs_cas);
+    std::array<uint64_t, 3> dims = {3, 5, 10};
+    std::vector<NodeLoopType> all_loop_types({
+        NodeLoopType::NonRange, NodeLoopType::NonRangeCost, NodeLoopType::Range
+    });
+    for (NodeLoopType cur_loop_type : all_loop_types)
+    {
+        test_bfs_cubic<pasl::pctl::parray, 3>(
+            dims, 
+            [cur_loop_type](uint64_t nodes_count, uint64_t start_node, std::vector<std::vector<uint64_t>> const& edges)
+            {
+                return bfs_cas(nodes_count, start_node, edges, cur_loop_type);
+            }
+        );
+    }
 }
