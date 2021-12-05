@@ -113,7 +113,7 @@ TEST(cas_bfs, stress_two_dimensions)
 
 TEST(cas_bfs, stress_three_dimensions)
 {
-    std::array<uint64_t, 3> dims = {3, 5, 10};
+    std::array<uint64_t, 3> dims = {5, 10, 20};
     std::vector<NodeLoopType> all_loop_types({
         NodeLoopType::NonRange, NodeLoopType::NonRangeCost, NodeLoopType::Range
     });
