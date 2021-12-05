@@ -9,12 +9,6 @@
 #include <atomic>
 #include <functional>
 
-template <typename T>
-T calc_sum_parallel(pasl::pctl::parray<T> const& arr) 
-{
-	return pasl::pctl::sum(arr.begin(), arr.end());
-}
-
 inline std::vector<int64_t> bfs_sequential(
     uint64_t nodes_count, uint64_t start_node,
     std::unordered_map<uint64_t, std::vector<uint64_t>> const& edges)
@@ -73,10 +67,12 @@ inline void process_single_node(
     if (it != edges.end())
     {
         std::vector<uint64_t> const& to_nodes = it->second;
+        assert(to_nodes.size() > 0);
         pasl::pctl::parallel_for(
             static_cast<uint64_t>(0), static_cast<uint64_t>(to_nodes.size()),
             [&taken, &result, &new_frontier, &to_nodes, start_idx, from_node](uint64_t edge_idx)
             {
+                assert(new_frontier[start_idx + edge_idx] == -1);
                 uint64_t to_node = to_nodes[edge_idx];
                 bool expected_taken = false;
                 if (taken[to_node].compare_exchange_strong(expected_taken, true))
@@ -84,7 +80,6 @@ inline void process_single_node(
                     assert(expected_taken == false);
                     assert(result[to_node] == -1);
                     result[to_node] = result[from_node] + 1;
-                    assert(new_frontier[start_idx + edge_idx] == -1);
                     new_frontier[start_idx + edge_idx] = to_node;
                 }
                 else
@@ -101,7 +96,7 @@ inline pasl::pctl::parray<int64_t> bfs_cas(
     std::unordered_map<uint64_t, std::vector<uint64_t>> const& edges)
 {
     assert(0 <= start_node && start_node < nodes_count);
-    pasl::pctl::parray<int64_t> result(nodes_count, static_cast<int64_t>(-1));
+    pasl::pctl::parray<int64_t> result(nodes_count, static_cast<int64_t>(-1)); // TODO: parray<atomic<int64_t>>
     result[start_node] = 0;
     pasl::pctl::parray<std::atomic<bool>> taken(
         nodes_count,
@@ -128,6 +123,7 @@ inline pasl::pctl::parray<int64_t> bfs_cas(
                 auto it = edges.find(cur_node);
                 if (it != edges.end())
                 {
+                    assert(it->second.size() > 0);
                     return static_cast<uint64_t>(it->second.size());
                 }
                 else

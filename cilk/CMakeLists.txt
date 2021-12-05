@@ -11,7 +11,7 @@ include_directories(./pctl/include)
 include_directories(./cmdline/include)
 include_directories(./chunkedseq/include)
 
-add_compile_options(-fcilkplus -std=c++17)
+add_compile_options(-g -fcilkplus -DUSE_CILK_PLUS_RUNTIME -std=c++17)
 
 add_executable(bench_scan.out src/scan.cpp benchmarks/bench_scan.cpp)
 target_link_libraries(bench_scan.out pthread cilkrts)
@@ -27,5 +27,8 @@ target_link_libraries(bench_sort.out pthread cilkrts)
 
 add_executable(bench_bfs.out benchmarks/bench_bfs.cpp)
 target_link_libraries(bench_bfs.out pthread cilkrts)
+
+add_executable(bench_sum.out benchmarks/bench_sum.cpp)
+target_link_libraries(bench_sum.out pthread cilkrts)
 
 add_subdirectory(tests)
