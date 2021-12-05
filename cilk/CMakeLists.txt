@@ -25,4 +25,7 @@ target_link_libraries(bench_filter_parallel.out pthread cilkrts)
 add_executable(bench_sort.out benchmarks/bench_sort.cpp src/scan.cpp)
 target_link_libraries(bench_sort.out pthread cilkrts)
 
+add_executable(bench_bfs.out benchmarks/bench_bfs.cpp)
+target_link_libraries(bench_bfs.out pthread cilkrts)
+
 add_subdirectory(tests)

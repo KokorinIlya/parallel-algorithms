@@ -63,7 +63,7 @@ void test_bfs_cubic(std::array<uint64_t, DIM> const& dimensions,
                     std::function<C<int64_t>(
                         uint64_t, uint64_t, 
                         std::unordered_map<uint64_t, std::vector<uint64_t>> const&
-                    )> bfs_fun)
+                    )> const& bfs_fun)
 {
     auto edges = build_graph(dimensions);
     uint64_t nodes_count = calc_nodes_count(dimensions);

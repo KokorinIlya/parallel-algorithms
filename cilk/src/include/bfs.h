@@ -59,7 +59,6 @@ inline pasl::pctl::parray<int64_t> bfs_cas(
     uint64_t nodes_count, uint64_t start_node,
     std::unordered_map<uint64_t, std::vector<uint64_t>> const& edges)
 {
-    //std::cout << "STARTED " << start_node << std::endl;
     assert(0 <= start_node && start_node < nodes_count);
     pasl::pctl::parray<int64_t> result(nodes_count, static_cast<int64_t>(-1));
     result[start_node] = 0;
@@ -75,29 +74,6 @@ inline pasl::pctl::parray<int64_t> bfs_cas(
 
     while (true)
     {
-        /*
-        std::cout << "FRONTIER: [";
-        for (uint64_t x : cur_frontier)
-        {
-            std::cout << x << " ";
-        }
-        std::cout << "]" << std::endl;
-
-        std::cout << "RESULT: [";
-        for (int64_t x : result)
-        {
-            std::cout << x << " ";
-        }
-        std::cout << "]" << std::endl;
-
-        std::cout << "TAKEN: [";
-        for (std::atomic<bool> const& x : taken)
-        {
-            std::cout << x.load() << " ";
-        }
-        std::cout << "]" << std::endl;
-        */
-
         assert(cur_frontier.size() > 0);
 
         pasl::pctl::parray<uint64_t> sizes(
@@ -120,15 +96,6 @@ inline pasl::pctl::parray<int64_t> bfs_cas(
             }
         );
 
-        /*
-        std::cout << "SIZES: [";
-        for (uint64_t x : sizes)
-        {
-            std::cout << x << " ";
-        }
-        std::cout << "]" << std::endl;
-        */
-
         pasl::pctl::parray<uint64_t> pref_sizes = pasl::pctl::scan<
             pasl::pctl::parray<uint64_t>::iterator,
             uint64_t,
@@ -145,15 +112,6 @@ inline pasl::pctl::parray<int64_t> bfs_cas(
 
         uint64_t new_frontier_size = pref_sizes[pref_sizes.size() - 1] + sizes[sizes.size() - 1];
         pasl::pctl::parray<int64_t> new_frontier(new_frontier_size, static_cast<int64_t>(-1));
-
-        /*
-        std::cout << "PREF SIZES: [";
-        for (uint64_t x : pref_sizes)
-        {
-            std::cout << x << " ";
-        }
-        std::cout << "], TOTAL_SIZE = " << new_frontier_size << std::endl;
-        */
 
         pasl::pctl::parallel_for(
             static_cast<uint64_t>(0), static_cast<uint64_t>(cur_frontier.size()),
