@@ -78,10 +78,12 @@ inline pasl::pctl::parray<int64_t> bfs_cas(
 
         pasl::pctl::parray<uint64_t> sizes(
             cur_frontier.size(),
-            [&cur_frontier, &edges, &taken](uint64_t idx)
+            [&cur_frontier, &edges, &taken, &result](uint64_t idx)
             {
-                assert(cur_frontier[idx] >= 0 && taken[idx].load());
+                assert(cur_frontier[idx] >= 0);
                 uint64_t cur_node = static_cast<uint64_t>(cur_frontier[idx]);
+                assert(taken[cur_node].load() && result[cur_node] >= 0);
+
                 auto it = edges.find(cur_node);
                 if (it != edges.end())
                 {
@@ -115,14 +117,16 @@ inline pasl::pctl::parray<int64_t> bfs_cas(
             static_cast<uint64_t>(0), static_cast<uint64_t>(cur_frontier.size()),
             [&edges, &cur_frontier, &taken, &result, &new_frontier](uint64_t node_idx)
             {
-                assert(cur_frontier[node_idx] >= 0 && taken[node_idx].load());
+                assert(cur_frontier[node_idx] >= 0);
                 uint64_t from_node = cur_frontier[node_idx];
+                assert(taken[from_node].load() && result[from_node] >= 0);
 
                 auto it = edges.find(from_node);
                 if (it != edges.end())
                 {
+                    std::vector<uint64_t> const& to_nodes = it->second;
                     pasl::pctl::parallel_for(
-                        static_cast<uint64_t>(0), static_cast<uint64_t>(it->second.size()),
+                        static_cast<uint64_t>(0), static_cast<uint64_t>(to_nodes.size()),
                         [&taken, &result, &new_frontier](uint64_t edge_idx)
                         {
                             // TODO
@@ -136,6 +140,7 @@ inline pasl::pctl::parray<int64_t> bfs_cas(
             new_frontier.begin(), new_frontier.end(),
             [](int64_t cur_node)
             {
+                assert(cur_node >= -1);
                 return cur_node != -1;
             } 
         );
