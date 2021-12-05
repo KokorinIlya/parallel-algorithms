@@ -14,7 +14,7 @@ uint64_t measure(
     std::array<uint64_t, DIM> const& dimensions, uint32_t reps,
     std::function<C<int64_t>(
         uint64_t, uint64_t, 
-        std::unordered_map<uint64_t, std::vector<uint64_t>> const&
+        std::vector<std::vector<uint64_t>> const&
     )> const& bfs_fun)
 {
     uint64_t nodes_count = calc_nodes_count(dimensions);

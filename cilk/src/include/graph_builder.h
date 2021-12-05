@@ -1,7 +1,6 @@
 #pragma once
 
 #include <array>
-#include <unordered_map>
 #include <vector>
 #include <cstdint>
 #include <cassert>
@@ -41,19 +40,9 @@ uint64_t calc_nodes_count(std::array<uint64_t, DIM> const& dimensions)
     return result;
 }
 
-void add_edge(std::unordered_map<uint64_t, std::vector<uint64_t>>& edges, uint64_t from_idx, uint64_t to_idx)
-{
-    if (edges.find(from_idx) == edges.end())
-    {
-        std::vector<uint64_t> empty;
-        edges[from_idx] = empty;
-    }
-    edges[from_idx].push_back(to_idx);
-}
-
 template <std::size_t DIM>
 void do_build_graph(
-    std::unordered_map<uint64_t, std::vector<uint64_t>>& edges,
+    std::vector<std::vector<uint64_t>>& edges,
     std::array<uint64_t, DIM> const& dimensions, std::array<uint64_t, DIM>& coords, std::size_t cur_coord_idx)
 {
     assert(cur_coord_idx <= DIM);
@@ -67,8 +56,8 @@ void do_build_graph(
             {
                 coords[delta_idx] += 1;
                 uint64_t n_idx = coords_to_index(coords, dimensions);
-                add_edge(edges, cur_idx, n_idx);
-                add_edge(edges, n_idx, cur_idx);
+                edges[cur_idx].push_back(n_idx);
+                edges[n_idx].push_back(cur_idx);
                 coords[delta_idx] -= 1;
             }
         }
@@ -85,9 +74,10 @@ void do_build_graph(
 }
 
 template <std::size_t DIM>
-std::unordered_map<uint64_t, std::vector<uint64_t>> build_graph(std::array<uint64_t, DIM> const& dimensions)
+std::vector<std::vector<uint64_t>> build_graph(std::array<uint64_t, DIM> const& dimensions)
 {
-    std::unordered_map<uint64_t, std::vector<uint64_t>> edges;
+    uint64_t nodes_count = calc_nodes_count(dimensions);
+    std::vector<std::vector<uint64_t>> edges(nodes_count);
     std::array<uint64_t, DIM> coords;
     do_build_graph(edges, dimensions, coords, 0);
     return edges;

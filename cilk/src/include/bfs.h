@@ -4,14 +4,13 @@
 #include "datapar.hpp"
 #include <vector>
 #include <cstdint>
-#include <unordered_map>
 #include <queue>
 #include <atomic>
 #include <functional>
 
 inline std::vector<int64_t> bfs_sequential(
     uint64_t nodes_count, uint64_t start_node,
-    std::unordered_map<uint64_t, std::vector<uint64_t>> const& edges)
+    std::vector<std::vector<uint64_t>> const& edges)
 {
     assert(0 <= start_node && start_node < nodes_count);
     std::vector<int64_t> result(nodes_count, -1);
@@ -27,12 +26,7 @@ inline std::vector<int64_t> bfs_sequential(
         assert(0 <= from_node && from_node < nodes_count);
         assert(result[from_node] >= 0);
 
-        auto it = edges.find(from_node);
-        if (it == edges.end())
-        {
-            continue;
-        }
-        for (uint64_t to_node : it->second)
+        for (uint64_t to_node : edges[from_node])
         {
             if (result[to_node] == -1)
             {
@@ -50,7 +44,7 @@ inline std::vector<int64_t> bfs_sequential(
 }
 
 inline void process_single_node(
-    std::unordered_map<uint64_t, std::vector<uint64_t>> const& edges,
+    std::vector<std::vector<uint64_t>> const& edges,
     pasl::pctl::parray<int64_t> const& cur_frontier,
     pasl::pctl::parray<std::atomic<int64_t>>& result,
     pasl::pctl::parray<int64_t>& new_frontier,
@@ -62,41 +56,36 @@ inline void process_single_node(
     assert(result[from_node].load() >= 0);
     uint64_t start_idx = pref_sizes[node_idx];
 
-    auto it = edges.find(from_node);
-    if (it != edges.end())
-    {
-        std::vector<uint64_t> const& to_nodes = it->second;
-        assert(to_nodes.size() > 0);
-        pasl::pctl::parallel_for(
-            static_cast<uint64_t>(0), static_cast<uint64_t>(to_nodes.size()),
-            [&result, &new_frontier, &to_nodes, start_idx, from_node](uint64_t edge_idx)
+    std::vector<uint64_t> const& to_nodes = edges[from_node];
+    pasl::pctl::parallel_for(
+        static_cast<uint64_t>(0), static_cast<uint64_t>(to_nodes.size()),
+        [&result, &new_frontier, &to_nodes, start_idx, from_node](uint64_t edge_idx)
+        {
+            assert(new_frontier[start_idx + edge_idx] == -1);
+            uint64_t to_node = to_nodes[edge_idx];
+            int64_t expected_result = -1;
+            int64_t new_result = result[from_node].load() + 1;
+            if (result[to_node].compare_exchange_strong(expected_result, new_result))
             {
-                assert(new_frontier[start_idx + edge_idx] == -1);
-                uint64_t to_node = to_nodes[edge_idx];
-                int64_t expected_result = -1;
-                int64_t new_result = result[from_node].load() + 1;
-                if (result[to_node].compare_exchange_strong(expected_result, new_result))
-                {
-                    assert(expected_result == -1);
-                    new_frontier[start_idx + edge_idx] = to_node;
-                }
-                else
-                {
-                    assert(expected_result >= 0);
-                }
+                assert(expected_result == -1);
+                new_frontier[start_idx + edge_idx] = to_node;
             }
-        );
-    }
+            else
+            {
+                assert(expected_result >= 0);
+            }
+        }
+    );
 }
 
 inline pasl::pctl::parray<int64_t> bfs_cas(
     uint64_t nodes_count, uint64_t start_node,
-    std::unordered_map<uint64_t, std::vector<uint64_t>> const& edges)
+    std::vector<std::vector<uint64_t>> const& edges)
 {
     assert(0 <= start_node && start_node < nodes_count);
     pasl::pctl::parray<std::atomic<int64_t>> result(
         nodes_count,
-        [](long) -> int64_t
+        [](uint64_t) -> int64_t
         {
             return static_cast<int64_t>(-1);
         } 
@@ -115,17 +104,7 @@ inline pasl::pctl::parray<int64_t> bfs_cas(
                 assert(cur_frontier[idx] >= 0);
                 uint64_t cur_node = static_cast<uint64_t>(cur_frontier[idx]);
                 assert(result[cur_node].load() >= 0);
-
-                auto it = edges.find(cur_node);
-                if (it != edges.end())
-                {
-                    assert(it->second.size() > 0);
-                    return static_cast<uint64_t>(it->second.size());
-                }
-                else
-                {
-                    return static_cast<uint64_t>(0);
-                }
+                return static_cast<uint64_t>(edges[cur_node].size());
             }
         );
 

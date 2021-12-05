@@ -4,7 +4,6 @@
 #include <array>
 #include <gtest/gtest.h>
 #include <cstdint>
-#include <unordered_set>
 #include "bfs.h"
 #include <vector>
 #include <functional>
@@ -62,7 +61,7 @@ template <template <typename, typename ...> typename C, std::size_t DIM>
 void test_bfs_cubic(std::array<uint64_t, DIM> const& dimensions,
                     std::function<C<int64_t>(
                         uint64_t, uint64_t, 
-                        std::unordered_map<uint64_t, std::vector<uint64_t>> const&
+                        std::vector<std::vector<uint64_t>> const&
                     )> const& bfs_fun)
 {
     auto edges = build_graph(dimensions);
