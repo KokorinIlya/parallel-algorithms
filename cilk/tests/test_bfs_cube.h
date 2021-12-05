@@ -95,3 +95,15 @@ TEST(sequential_bfs, stress_three_dimensions)
     std::array<uint64_t, 3> dims = {3, 10, 5};
     test_bfs_cubic<std::vector, 3>(dims, bfs_sequential);
 }
+
+TEST(cas_bfs, stress_two_dimensions)
+{
+    std::array<uint64_t, 2> dims = {20, 40};
+    test_bfs_cubic<pasl::pctl::parray, 2>(dims, bfs_cas);
+}
+
+TEST(cas_bfs, stress_three_dimensions)
+{
+    std::array<uint64_t, 3> dims = {5, 10, 20};
+    test_bfs_cubic<pasl::pctl::parray, 3>(dims, bfs_cas);
+}
