@@ -80,11 +80,17 @@ inline pasl::pctl::parray<int64_t> bfs_cas(
             cur_frontier.size(),
             [&cur_frontier, &edges, &taken](uint64_t idx)
             {
-                uint64_t cur_node = cur_frontier[idx];
-                assert(cur_node >= 0 && taken[idx].load());
+                assert(cur_frontier[idx] >= 0 && taken[idx].load());
+                uint64_t cur_node = static_cast<uint64_t>(cur_frontier[idx]);
                 auto it = edges.find(cur_node);
-                assert(it != edges.end());
-                return it->second.size();
+                if (it != edges.end())
+                {
+                    return static_cast<uint64_t>(it->second.size());
+                }
+                else
+                {
+                    return static_cast<uint64_t>(0);
+                }
             }
         );
 
@@ -105,7 +111,26 @@ inline pasl::pctl::parray<int64_t> bfs_cas(
         uint64_t new_frontier_size = sizes[sizes.size() - 1] + last_node_size;
         pasl::pctl::parray<int64_t> new_frontier(new_frontier_size, static_cast<int64_t>(-1));
 
-        // TODO
+        pasl::pctl::parallel_for(
+            static_cast<uint64_t>(0), static_cast<uint64_t>(cur_frontier.size()),
+            [&edges, &cur_frontier, &taken, &result, &new_frontier](uint64_t node_idx)
+            {
+                assert(cur_frontier[node_idx] >= 0 && taken[node_idx].load());
+                uint64_t from_node = cur_frontier[node_idx];
+
+                auto it = edges.find(from_node);
+                if (it != edges.end())
+                {
+                    pasl::pctl::parallel_for(
+                        static_cast<uint64_t>(0), static_cast<uint64_t>(it->second.size()),
+                        [&taken, &result, &new_frontier](uint64_t edge_idx)
+                        {
+                            // TODO
+                        }
+                    );
+                }
+            }
+        );
 
         cur_frontier = pasl::pctl::filter(
             new_frontier.begin(), new_frontier.end(),
