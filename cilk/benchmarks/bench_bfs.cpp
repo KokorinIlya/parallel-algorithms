@@ -8,6 +8,7 @@
 #include <vector>
 #include <functional>
 #include <array>
+#include <string>
 
 template <template <typename, typename ...> typename C, std::size_t DIM>
 uint64_t measure(
@@ -26,9 +27,24 @@ uint64_t measure(
     return sum / reps;
 }
 
+std::string node_loop_type_to_string(NodeLoopType node_loop_type)
+{
+    switch (node_loop_type)
+    {
+        case NodeLoopType::NonRange:
+            return "non_range";
+        case NodeLoopType::NonRangeCost:
+            return "non_range_cost";
+        case NodeLoopType::Range:
+            return "range";
+        default:
+            return "error!";
+    }
+}
+
 int main()
 {
-    assert(false);
+    assert(false && "disable assertions before banchmarking");
     std::array<uint64_t, 3> dims = {500, 500, 500};
     uint64_t nodes_count = calc_nodes_count(dims);
     auto edges = build_graph(dims);
@@ -38,35 +54,34 @@ int main()
     uint64_t seq_res = measure<std::vector, 3>(nodes_count, edges, reps, bfs_sequential);
     std::cout << "Elapsed " << seq_res << " milliseconds" << std::endl;
 
-    std::cout << "Measuring parallel + CAS BFS (non-range loop)" << std::endl;
-    uint64_t cas_res = measure<pasl::pctl::parray, 3>(
-        nodes_count, edges, reps, 
-        [](uint64_t nodes_count, uint64_t start_node, std::vector<std::vector<uint64_t>> const& edges)
+    std::vector<NodeLoopType> all_loop_types({
+        NodeLoopType::NonRange, NodeLoopType::NonRangeCost, NodeLoopType::Range
+    });
+    std::vector<bool> all_bools({false, true});
+    
+    for (NodeLoopType cur_loop_type : all_loop_types)
+    {
+        for (bool process_edges_in_parallel : all_bools)
         {
-            return bfs_cas(nodes_count, start_node, edges, NodeLoopType::NonRange);
-        }
-    );
-    std::cout << "Elapsed " << cas_res << " milliseconds" << std::endl;
+            std::cout << "Measuring parallel + CAS, loop type = " << 
+                node_loop_type_to_string(cur_loop_type) << 
+                ", process edges in parallel = " << process_edges_in_parallel << std::endl;
 
-    std::cout << "Measuring parallel + CAS BFS (non-range loop with costs)" << std::endl;
-    cas_res = measure<pasl::pctl::parray, 3>(
-        nodes_count, edges, reps, 
-        [](uint64_t nodes_count, uint64_t start_node, std::vector<std::vector<uint64_t>> const& edges)
-        {
-            return bfs_cas(nodes_count, start_node, edges, NodeLoopType::NonRangeCost);
+            uint64_t cas_res = measure<pasl::pctl::parray, 3>(
+                nodes_count, edges, reps, 
+                [cur_loop_type, process_edges_in_parallel](
+                    uint64_t nodes_count, uint64_t start_node, 
+                    std::vector<std::vector<uint64_t>> const& edges)
+                {
+                    return bfs_cas(
+                        nodes_count, start_node, edges, 
+                        cur_loop_type, process_edges_in_parallel
+                    );
+                }
+            );
+            std::cout << "Elapsed " << cas_res << " milliseconds" << std::endl;
         }
-    );
-    std::cout << "Elapsed " << cas_res << " milliseconds" << std::endl;
-
-    std::cout << "Measuring parallel + CAS BFS (range loop)" << std::endl;
-    cas_res = measure<pasl::pctl::parray, 3>(
-        nodes_count, edges, reps, 
-        [](uint64_t nodes_count, uint64_t start_node, std::vector<std::vector<uint64_t>> const& edges)
-        {
-            return bfs_cas(nodes_count, start_node, edges, NodeLoopType::Range);
-        }
-    );
-    std::cout << "Elapsed " << cas_res << " milliseconds" << std::endl;
+    }
 
     return 0;
 }

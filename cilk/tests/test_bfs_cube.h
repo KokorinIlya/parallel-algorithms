@@ -93,38 +93,41 @@ TEST(sequential_bfs, stress_three_dimensions)
     test_bfs_cubic<std::vector, 3>(dims, bfs_sequential);
 }
 
-TEST(cas_bfs, stress_two_dimensions)
+template <std::size_t DIM>
+void test_cas_bfs(std::array<uint64_t, DIM> const& dims)
 {
-    std::array<uint64_t, 2> dims = {10, 20};
     std::vector<NodeLoopType> all_loop_types({
         NodeLoopType::NonRange, NodeLoopType::NonRangeCost, NodeLoopType::Range
     });
+    std::vector<bool> all_bools({false, true});
     for (NodeLoopType cur_loop_type : all_loop_types)
     {
-        test_bfs_cubic<pasl::pctl::parray, 2>(
-            dims, 
-            [cur_loop_type](uint64_t nodes_count, uint64_t start_node, std::vector<std::vector<uint64_t>> const& edges)
-            {
-                return bfs_cas(nodes_count, start_node, edges, cur_loop_type);
-            }
-        );
+        for (bool process_edges_in_parallel : all_bools)
+        {
+            test_bfs_cubic<pasl::pctl::parray, DIM>(
+                dims, 
+                [cur_loop_type, process_edges_in_parallel](
+                    uint64_t nodes_count, uint64_t start_node,
+                    std::vector<std::vector<uint64_t>> const& edges)
+                {
+                    return bfs_cas(
+                        nodes_count, start_node, edges, 
+                        cur_loop_type, process_edges_in_parallel
+                    );
+                }
+            );
+        }
     }
+}
+
+TEST(cas_bfs, stress_two_dimensions)
+{
+    std::array<uint64_t, 2> dims = {10, 20};
+    test_cas_bfs<2>(dims);
 }
 
 TEST(cas_bfs, stress_three_dimensions)
 {
     std::array<uint64_t, 3> dims = {5, 10, 20};
-    std::vector<NodeLoopType> all_loop_types({
-        NodeLoopType::NonRange, NodeLoopType::NonRangeCost, NodeLoopType::Range
-    });
-    for (NodeLoopType cur_loop_type : all_loop_types)
-    {
-        test_bfs_cubic<pasl::pctl::parray, 3>(
-            dims, 
-            [cur_loop_type](uint64_t nodes_count, uint64_t start_node, std::vector<std::vector<uint64_t>> const& edges)
-            {
-                return bfs_cas(nodes_count, start_node, edges, cur_loop_type);
-            }
-        );
-    }
+    test_cas_bfs<3>(dims);
 }
