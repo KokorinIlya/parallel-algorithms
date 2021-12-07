@@ -15,15 +15,16 @@
 * `cd $(pwd)/build`
 * `cmake -DCMAKE_INSTALL_PREFIX=/home/ubuntu/parallel-algorithms/cilk -P cmake_install.cmake`
 
+## Установка PCTL
+* Выполнять из родительской директории (`/home/ubuntu`)
+* `wget https://raw.githubusercontent.com/deepsea-inria/pctl/master/script/get.sh`
+* `chmod +x ./get.sh`
+* `./get.sh $(pwd)/parallel-algorithms/cilk`
+
 ## Установка Google Tests
 
 * Выполнять в директории проекта (`/home/ubuntu/parallel-algorithms/cilk/`)
 * `git clone https://github.com/google/googletest.git tests/lib`
-
-## Компиляция
-
-* Выполнять в директории проекта (`/home/ubuntu/parallel-algorithms/cilk/`)
-* `bin/clang++ -fcilkplus test.cpp`
 
 ## Компиляция с использованием CMake
 
